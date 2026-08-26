@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: PedeAI Cardapio API
+  version: 1.0.0
+  description: API para cardapio online, delivery e atendimento presencial.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/v1/categories:
+    get:
+      summary: Lista categorias
+      responses: { '200': { description: OK } }
+    post:
+      summary: Cria categoria
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CategoryInput' } } } }
+      responses: { '201': { description: Criada }, '422': { $ref: '#/components/responses/ValidationError' } }
+  /api/v1/products:
+    get:
+      summary: Lista produtos disponiveis
+      parameters: [{ in: query, name: category_id, schema: { type: integer } }]
+      responses: { '200': { description: OK } }
+    post:
+      summary: Cria produto
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ProductInput' } } } }
+      responses: { '201': { description: Criado }, '422': { $ref: '#/components/responses/ValidationError' } }
+  /api/v1/orders:
+    get:
+      summary: Lista pedidos
+      parameters: [{ in: query, name: status, schema: { type: string } }]
+      responses: { '200': { description: OK } }
+    post:
+      summary: Cria pedido delivery ou presencial
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/OrderInput' } } } }
+      responses: { '201': { description: Criado }, '422': { $ref: '#/components/responses/ValidationError' } }
+  /api/v1/orders/{id}:
+    patch:
+      summary: Atualiza status do pedido
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [order], properties: { order: { type: object, properties: { status: { type: string, enum: [pending, confirmed, preparing, ready, delivered, cancelled] } } } } } } } }
+      responses: { '200': { description: Atualizado } }
+components:
+  schemas:
+    CategoryInput: { type: object, required: [category], properties: { category: { type: object, required: [name], properties: { name: { type: string }, description: { type: string }, position: { type: integer } } } } }
+    ProductInput: { type: object, required: [product], properties: { product: { type: object, required: [category_id, name, price], properties: { category_id: { type: integer }, name: { type: string }, description: { type: string }, price: { type: number, format: float }, available: { type: boolean } } } } }
+    OrderInput: { type: object, required: [order], properties: { order: { type: object, required: [customer_name, customer_phone, order_type, payment_method, items], properties: { customer_name: { type: string }, customer_phone: { type: string }, order_type: { type: string, enum: [delivery, dine_in] }, delivery_address: { type: string }, table_number: { type: string }, payment_method: { type: string, enum: [cash, card, pix] }, items: { type: array, items: { type: object, required: [product_id, quantity], properties: { product_id: { type: integer }, quantity: { type: integer, minimum: 1 } } } } } } } }
+  responses:
+    ValidationError: { description: Entrada invalida, content: { application/json: { schema: { type: object, properties: { error: { type: string }, messages: { type: array, items: { type: string } } } } } } }

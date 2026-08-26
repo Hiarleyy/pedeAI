@@ -1,0 +1,5 @@
+pizzas = Category.create!(name: "Pizzas", description: "Pizzas artesanais")
+burgers = Category.create!(name: "Lanches", description: "Hamburgueres e acompanhamentos")
+Product.create!(category: pizzas, name: "Margherita", description: "Molho, mussarela e manjericao", price: 39.90)
+Product.create!(category: pizzas, name: "Calabresa", description: "Calabresa, cebola e mussarela", price: 42.90)
+Product.create!(category: burgers, name: "Classic Burger", description: "Blend 160g, queijo e molho da casa", price: 32.90)
