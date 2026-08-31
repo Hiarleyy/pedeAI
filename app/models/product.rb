@@ -1,4 +1,5 @@
 class Product < ApplicationRecord
+  belongs_to :restaurant, optional: true
   belongs_to :category
   validates :name, presence: true, length: { in: 2..120 }
   validates :description, length: { maximum: 500 }, allow_blank: true

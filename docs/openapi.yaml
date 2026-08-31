@@ -1,47 +1,336 @@
 openapi: 3.0.3
 info:
-  title: PedeAI Cardapio API
-  version: 1.0.0
-  description: API para cardapio online, delivery e atendimento presencial.
+  title: PedeAI Cardápio API
+  version: 1.1.0
+  description: API para cardápio online, delivery e atendimento presencial.
 servers:
   - url: http://localhost:3000
+tags:
+  - name: Autenticação
+  - name: Restaurantes
+  - name: Usuários
+  - name: Categorias
+  - name: Produtos
+  - name: Pedidos
 paths:
+  /api/v1/session:
+    post:
+      tags: [Autenticação]
+      summary: Autentica um usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginInput' }
+      responses:
+        '200': { description: Token criado, content: { application/json: { schema: { $ref: '#/components/schemas/Session' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/restaurants:
+    get:
+      tags: [Restaurantes]
+      summary: Lista restaurantes acessíveis ao usuário
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200': { description: Restaurantes acessíveis, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Restaurant' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Restaurantes]
+      summary: Cria um restaurante (apenas superAdmin)
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RestaurantInput' } } }
+      responses:
+        '201': { description: Restaurante criado, content: { application/json: { schema: { $ref: '#/components/schemas/Restaurant' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /api/v1/restaurants/{id}:
+    get:
+      tags: [Restaurantes]
+      summary: Exibe um restaurante acessível ao usuário
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: Restaurante, content: { application/json: { schema: { $ref: '#/components/schemas/Restaurant' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/restaurants/{restaurant_id}/users:
+    get:
+      tags: [Usuários]
+      summary: Lista usuários do restaurante
+      description: Admin e superAdmin podem listar; funcionário precisa da permissão users:read.
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/RestaurantId' }]
+      responses:
+        '200': { description: Usuários, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/User' } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Usuários]
+      summary: Cria usuário no restaurante
+      description: Admin só pode criar funcionários. superAdmin pode criar admin ou funcionário.
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/RestaurantId' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/UserInput' } } }
+      responses:
+        '201': { description: Usuário criado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /api/v1/restaurants/{restaurant_slug}/users/{id}:
+    patch:
+      tags: [Usuários]
+      summary: Atualiza usuário e permissões no restaurante
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: restaurant_slug, in: path, required: true, schema: { type: string } }
+        - { $ref: '#/components/parameters/Id' }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/UserInput' } } }
+      responses:
+        '200': { description: Usuário atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Usuários]
+      summary: Exclui usuário do restaurante
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: restaurant_slug, in: path, required: true, schema: { type: string } }
+        - { $ref: '#/components/parameters/Id' }
+      responses:
+        '204': { description: Usuário excluído }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/users/{id}:
+    patch:
+      tags: [Usuários]
+      summary: Atualiza usuário e permissões
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/UserInput' } } }
+      responses:
+        '200': { description: Usuário atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /api/v1/categories:
     get:
-      summary: Lista categorias
-      responses: { '200': { description: OK } }
+      tags: [Categorias]
+      summary: Lista categorias (público)
+      responses: { '200': { description: Categorias } }
     post:
+      tags: [Categorias]
       summary: Cria categoria
-      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CategoryInput' } } } }
-      responses: { '201': { description: Criada }, '422': { $ref: '#/components/responses/ValidationError' } }
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CategoryInput' } } }
+      responses:
+        '201': { description: Categoria criada }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/categories/{id}:
+    get:
+      tags: [Categorias]
+      summary: Exibe categoria (público)
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '200': { description: Categoria }, '404': { $ref: '#/components/responses/NotFound' } }
+    patch:
+      tags: [Categorias]
+      summary: Atualiza categoria
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CategoryInput' } } }
+      responses: { '200': { description: Categoria atualizada }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' } }
+    delete:
+      tags: [Categorias]
+      summary: Remove categoria
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '204': { description: Categoria removida }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' } }
+
   /api/v1/products:
     get:
-      summary: Lista produtos disponiveis
+      tags: [Produtos]
+      summary: Lista produtos disponíveis (público)
       parameters: [{ in: query, name: category_id, schema: { type: integer } }]
-      responses: { '200': { description: OK } }
+      responses: { '200': { description: Produtos } }
     post:
+      tags: [Produtos]
       summary: Cria produto
-      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ProductInput' } } } }
-      responses: { '201': { description: Criado }, '422': { $ref: '#/components/responses/ValidationError' } }
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ProductInput' } } }
+      responses: { '201': { description: Produto criado }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/ValidationError' } }
+  /api/v1/products/{id}:
+    get:
+      tags: [Produtos]
+      summary: Exibe produto (público)
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '200': { description: Produto }, '404': { $ref: '#/components/responses/NotFound' } }
+    patch:
+      tags: [Produtos]
+      summary: Atualiza produto
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ProductInput' } } }
+      responses: { '200': { description: Produto atualizado }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' } }
+    delete:
+      tags: [Produtos]
+      summary: Remove produto
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '204': { description: Produto removido }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' } }
+
   /api/v1/orders:
     get:
-      summary: Lista pedidos
-      parameters: [{ in: query, name: status, schema: { type: string } }]
-      responses: { '200': { description: OK } }
+      tags: [Pedidos]
+      summary: Lista pedidos do restaurante
+      security: [{ BearerAuth: [] }]
+      parameters: [{ in: query, name: status, schema: { type: string, enum: [pending, confirmed, preparing, ready, delivered, cancelled] } }]
+      responses: { '200': { description: Pedidos }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' } }
     post:
-      summary: Cria pedido delivery ou presencial
-      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/OrderInput' } } } }
-      responses: { '201': { description: Criado }, '422': { $ref: '#/components/responses/ValidationError' } }
+      tags: [Pedidos]
+      summary: Cria pedido delivery ou presencial (público)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/OrderInput' } } }
+      responses: { '201': { description: Pedido criado }, '422': { $ref: '#/components/responses/ValidationError' } }
   /api/v1/orders/{id}:
+    get:
+      tags: [Pedidos]
+      summary: Exibe pedido
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses: { '200': { description: Pedido }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { $ref: '#/components/responses/NotFound' } }
     patch:
+      tags: [Pedidos]
       summary: Atualiza status do pedido
-      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
-      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [order], properties: { order: { type: object, properties: { status: { type: string, enum: [pending, confirmed, preparing, ready, delivered, cancelled] } } } } } } } }
-      responses: { '200': { description: Atualizado } }
+      security: [{ BearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [order]
+              properties:
+                order:
+                  type: object
+                  required: [status]
+                  properties:
+                    status: { type: string, enum: [pending, confirmed, preparing, ready, delivered, cancelled] }
+      responses: { '200': { description: Pedido atualizado }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { $ref: '#/components/responses/NotFound' } }
+
 components:
+  securitySchemes:
+    BearerAuth: { type: http, scheme: bearer, bearerFormat: RailsSignedId }
+  parameters:
+    Id: { in: path, name: id, required: true, schema: { type: integer, format: int64 } }
+    RestaurantId: { in: path, name: restaurant_id, required: true, schema: { type: integer, format: int64 } }
   schemas:
-    CategoryInput: { type: object, required: [category], properties: { category: { type: object, required: [name], properties: { name: { type: string }, description: { type: string }, position: { type: integer } } } } }
-    ProductInput: { type: object, required: [product], properties: { product: { type: object, required: [category_id, name, price], properties: { category_id: { type: integer }, name: { type: string }, description: { type: string }, price: { type: number, format: float }, available: { type: boolean } } } } }
-    OrderInput: { type: object, required: [order], properties: { order: { type: object, required: [customer_name, customer_phone, order_type, payment_method, items], properties: { customer_name: { type: string }, customer_phone: { type: string }, order_type: { type: string, enum: [delivery, dine_in] }, delivery_address: { type: string }, table_number: { type: string }, payment_method: { type: string, enum: [cash, card, pix] }, items: { type: array, items: { type: object, required: [product_id, quantity], properties: { product_id: { type: integer }, quantity: { type: integer, minimum: 1 } } } } } } } }
+    LoginInput:
+      type: object
+      required: [user]
+      properties:
+        user:
+          type: object
+          required: [email, password]
+          properties: { email: { type: string, format: email }, password: { type: string, format: password } }
+    Session:
+      type: object
+      properties: { token: { type: string }, user: { $ref: '#/components/schemas/User' } }
+    RestaurantInput:
+      type: object
+      required: [restaurant]
+      properties:
+        restaurant:
+          type: object
+          required: [name]
+          properties: { name: { type: string, minLength: 2, maxLength: 120 }, slug: { type: string, example: pedeai-centro } }
+    Restaurant:
+      type: object
+      properties: { id: { type: integer }, name: { type: string }, slug: { type: string } }
+    UserInput:
+      type: object
+      required: [user]
+      properties:
+        user:
+          type: object
+          required: [name, email, password, role]
+          properties:
+            name: { type: string }
+            email: { type: string, format: email }
+            password: { type: string, format: password }
+            password_confirmation: { type: string, format: password }
+            role: { type: string, enum: [superAdmin, admin, funcionario] }
+            permissions: { type: object, additionalProperties: { type: boolean }, example: { 'orders:read': true, 'orders:update': true } }
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { type: string, enum: [superAdmin, admin, funcionario] }
+        permissions: { type: object, additionalProperties: { type: boolean } }
+        restaurant_id: { type: integer, nullable: true }
+    CategoryInput:
+      type: object
+      required: [category]
+      properties:
+        category:
+          type: object
+          required: [name]
+          properties: { name: { type: string }, description: { type: string }, position: { type: integer } }
+    ProductInput:
+      type: object
+      required: [product]
+      properties:
+        product:
+          type: object
+          required: [category_id, name, price]
+          properties: { category_id: { type: integer }, name: { type: string }, description: { type: string }, price: { type: number, format: float, exclusiveMinimum: 0 }, available: { type: boolean }, image_url: { type: string, format: uri } }
+    OrderInput:
+      type: object
+      required: [order]
+      properties:
+        order:
+          type: object
+          required: [customer_name, customer_phone, order_type, payment_method, items]
+          properties:
+            customer_name: { type: string }
+            customer_phone: { type: string }
+            order_type: { type: string, enum: [delivery, dine_in] }
+            delivery_address: { type: string }
+            table_number: { type: string }
+            payment_method: { type: string, enum: [cash, card, pix] }
+            items: { type: array, items: { type: object, required: [product_id, quantity], properties: { product_id: { type: integer }, quantity: { type: integer, minimum: 1, maximum: 50 } } } }
+    Error:
+      type: object
+      properties: { error: { type: string }, messages: { type: array, items: { type: string } } }
   responses:
-    ValidationError: { description: Entrada invalida, content: { application/json: { schema: { type: object, properties: { error: { type: string }, messages: { type: array, items: { type: string } } } } } } }
+    Unauthorized: { description: Autenticação necessária, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    Forbidden: { description: Sem permissão para executar a operação, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    NotFound: { description: Recurso não encontrado, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    ValidationError: { description: Entrada inválida, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
