@@ -1,5 +1,5 @@
-class Order < ApplicationRecord
-  belongs_to :restaurant, optional: true
+﻿class Order < ApplicationRecord
+  belongs_to :restaurant
   has_many :order_items, dependent: :destroy
   has_many :products, through: :order_items
   enum :order_type, { delivery: "delivery", dine_in: "dine_in" }

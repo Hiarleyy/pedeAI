@@ -1,4 +1,4 @@
-module Api
+﻿module Api
   module V1
     class CategoriesController < ApplicationController
       include Authenticatable
@@ -10,11 +10,14 @@ module Api
         scope = scope.where(restaurant: Restaurant.find_by!(slug: params[:restaurant_slug])) if params[:restaurant_slug].present?
         render json: scope
       end
-      def show = render json: Category.find(params[:id])
+      def show
+        scope = params[:restaurant_slug].present? ? Category.where(restaurant: Restaurant.find_by!(slug: params[:restaurant_slug])) : Category.all
+        render json: scope.find(params[:id])
+      end
       def create
         category = Category.new(category_params)
         category.restaurant = accessible_restaurant if params[:restaurant_slug].present?
-        category.restaurant = current_user.restaurant unless current_user.super_admin?
+        category.restaurant = current_user.restaurant unless params[:restaurant_slug].present?
         category.save ? render(json: category, status: :created) : render_errors(category)
       end
       def update
@@ -29,7 +32,7 @@ module Api
       def category_params = params.require(:category).permit(:name, :description, :position)
 
       def manageable_scope(model)
-        params[:restaurant_slug].present? ? model.where(restaurant: accessible_restaurant) : (current_user.super_admin? ? model.all : model.where(restaurant: current_user.restaurant))
+        params[:restaurant_slug].present? ? model.where(restaurant: accessible_restaurant) : model.where(restaurant: current_user.restaurant)
       end
     end
   end

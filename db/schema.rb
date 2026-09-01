@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_26_000006) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_01_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,9 +19,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_26_000006) do
     t.text "description"
     t.string "name", null: false
     t.integer "position", default: 0, null: false
-    t.bigint "restaurant_id"
+    t.bigint "restaurant_id", null: false
     t.datetime "updated_at", null: false
-    t.index "lower((name)::text)", name: "index_categories_on_lower_name", unique: true
+    t.index "restaurant_id, lower((name)::text)", name: "index_categories_on_restaurant_and_lower_name", unique: true
     t.index ["restaurant_id"], name: "index_categories_on_restaurant_id"
   end
 
@@ -43,7 +43,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_26_000006) do
     t.string "delivery_address"
     t.string "order_type", null: false
     t.string "payment_method", null: false
-    t.bigint "restaurant_id"
+    t.bigint "restaurant_id", null: false
     t.string "status", default: "pending", null: false
     t.string "table_number"
     t.decimal "total", precision: 10, scale: 2, default: "0.0", null: false
@@ -60,7 +60,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_26_000006) do
     t.string "image_url"
     t.string "name", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
-    t.bigint "restaurant_id"
+    t.bigint "restaurant_id", null: false
     t.datetime "updated_at", null: false
     t.index ["available"], name: "index_products_on_available"
     t.index ["category_id"], name: "index_products_on_category_id"
@@ -68,8 +68,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_26_000006) do
   end
 
   create_table "restaurants", force: :cascade do |t|
+    t.text "banner_url"
     t.datetime "created_at", null: false
+    t.text "logo_url"
+    t.text "menu_description"
     t.string "name", null: false
+    t.string "primary_color", default: "#d34000", null: false
+    t.text "product_placeholder_url"
     t.string "slug", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_restaurants_on_slug", unique: true
@@ -85,6 +90,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_26_000006) do
     t.string "role", default: "funcionario", null: false
     t.datetime "updated_at", null: false
     t.index "lower((email)::text)", name: "index_users_on_lower_email", unique: true
+    t.index ["restaurant_id"], name: "index_users_on_one_super_admin_per_restaurant", unique: true, where: "((role)::text = 'superAdmin'::text)"
     t.index ["restaurant_id"], name: "index_users_on_restaurant_id"
     t.index ["role"], name: "index_users_on_role"
   end

@@ -1,11 +1,11 @@
-Rails.application.routes.draw do
+﻿Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :categories, only: %i[index show create update destroy]
       resources :products, only: %i[index show create update destroy]
       resources :orders, only: %i[index show create update]
       resource :session, only: :create
-      resources :restaurants, only: %i[index show create]
+      resources :restaurants, only: %i[index show create update]
       resources :restaurants, only: [] do
         resources :users, only: %i[index create destroy]
       end
@@ -13,6 +13,9 @@ Rails.application.routes.draw do
       scope "restaurants/:restaurant_slug" do
         get "categories", to: "categories#index"
         post "categories", to: "categories#create"
+        get "categories/:id", to: "categories#show"
+        patch "categories/:id", to: "categories#update"
+        delete "categories/:id", to: "categories#destroy"
         get "products", to: "products#index"
         post "orders", to: "orders#create"
         get "orders", to: "orders#index"
@@ -38,3 +41,4 @@ Rails.application.routes.draw do
   get "/cardapio/:restaurant_slug", to: "pages#menu"
   get "/up", to: "rails/health#show", as: :rails_health_check
 end
+

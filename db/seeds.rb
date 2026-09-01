@@ -1,4 +1,4 @@
-# Dados básicos para desenvolvimento e demonstração no navegador.
+﻿# Dados básicos para desenvolvimento e demonstração no navegador.
 # Execute com: bin/rails db:seed
 
 restaurants = [
@@ -17,7 +17,7 @@ category_descriptions = {
     "Bebidas" => "Bebidas geladas"
   }
   categories = category_descriptions.to_h do |name, description|
-    [name, Category.find_or_create_by!(name: name) do |category|
+    [name, Category.find_or_create_by!(restaurant: restaurant, name: name) do |category|
       category.description = description
     end]
   end
@@ -46,6 +46,13 @@ category_descriptions = {
     end
   end
 
+  User.find_or_create_by!(email: "superadmin@#{restaurant.slug}.pedeai.test") do |user|
+    user.name = "SuperAdmin #{restaurant.name}"
+    user.password = "admin123"
+    user.password_confirmation = "admin123"
+    user.role = "superAdmin"
+    user.restaurant = restaurant
+  end
   User.find_or_create_by!(email: "admin@#{restaurant.slug}.pedeai.test") do |user|
     user.name = "Admin #{restaurant.name}"
     user.password = "admin123"
@@ -64,16 +71,8 @@ category_descriptions = {
   end
 end
 
-User.find_or_create_by!(email: "admin@pedeai.com.br") do |user|
-  user.name = "Administrador PedeAI"
-  user.password = "admin123"
-  user.password_confirmation = "admin123"
-  user.role = "superAdmin"
-end
-
 puts "Seed concluído."
-puts "SuperAdmin: admin@pedeai.com.br / admin123 (painel global: /admin)"
 puts "Forno & Massa: /cardapio/forno-e-massa e /admin/forno-e-massa"
-puts "  Admin: admin@forno-e-massa.pedeai.test / admin123"
+puts "  SuperAdmin: superadmin@forno-e-massa.pedeai.test / admin123"
 puts "Casa do Sabor: /cardapio/casa-do-sabor e /admin/casa-do-sabor"
-puts "  Admin: admin@casa-do-sabor.pedeai.test / admin123"
+puts "  SuperAdmin: superadmin@casa-do-sabor.pedeai.test / admin123"

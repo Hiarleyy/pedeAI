@@ -1,22 +1,22 @@
-openapi: 3.0.3
+﻿openapi: 3.0.3
 info:
-  title: PedeAI Cardápio API
+  title: PedeAI CardÃ¡pio API
   version: 1.1.0
-  description: API para cardápio online, delivery e atendimento presencial.
+  description: API para cardÃ¡pio online, delivery e atendimento presencial.
 servers:
   - url: http://localhost:3000
 tags:
-  - name: Autenticação
+  - name: AutenticaÃ§Ã£o
   - name: Restaurantes
-  - name: Usuários
+  - name: UsuÃ¡rios
   - name: Categorias
   - name: Produtos
   - name: Pedidos
 paths:
   /api/v1/session:
     post:
-      tags: [Autenticação]
-      summary: Autentica um usuário
+      tags: [AutenticaÃ§Ã£o]
+      summary: Autentica um usuÃ¡rio
       requestBody:
         required: true
         content:
@@ -29,28 +29,25 @@ paths:
   /api/v1/restaurants:
     get:
       tags: [Restaurantes]
-      summary: Lista restaurantes acessíveis ao usuário
+      summary: Lista restaurantes acessÃ­veis ao usuÃ¡rio
       security: [{ BearerAuth: [] }]
       responses:
-        '200': { description: Restaurantes acessíveis, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Restaurant' } } } } }
+        '200': { description: Restaurantes acessÃ­veis, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Restaurant' } } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
     post:
       tags: [Restaurantes]
-      summary: Cria um restaurante (apenas superAdmin)
-      security: [{ BearerAuth: [] }]
+      summary: Cria um restaurante com seu superAdmin
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/RestaurantInput' } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/RestaurantCreationInput' } } }
       responses:
         '201': { description: Restaurante criado, content: { application/json: { schema: { $ref: '#/components/schemas/Restaurant' } } } }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
 
   /api/v1/restaurants/{id}:
     get:
       tags: [Restaurantes]
-      summary: Exibe um restaurante acessível ao usuário
+      summary: Exibe um restaurante acessÃ­vel ao usuÃ¡rio
       security: [{ BearerAuth: [] }]
       parameters: [{ $ref: '#/components/parameters/Id' }]
       responses:
@@ -60,34 +57,34 @@ paths:
 
   /api/v1/restaurants/{restaurant_id}/users:
     get:
-      tags: [Usuários]
-      summary: Lista usuários do restaurante
-      description: Admin e superAdmin podem listar; funcionário precisa da permissão users:read.
+      tags: [UsuÃ¡rios]
+      summary: Lista usuÃ¡rios do restaurante
+      description: Admin e superAdmin do próprio restaurante podem listar; funcionário precisa da permissão users:read.
       security: [{ BearerAuth: [] }]
       parameters: [{ $ref: '#/components/parameters/RestaurantId' }]
       responses:
-        '200': { description: Usuários, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/User' } } } } }
+        '200': { description: UsuÃ¡rios, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/User' } } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
     post:
-      tags: [Usuários]
-      summary: Cria usuário no restaurante
-      description: Admin só pode criar funcionários. superAdmin pode criar admin ou funcionário.
+      tags: [UsuÃ¡rios]
+      summary: Cria usuÃ¡rio no restaurante
+      description: Admin só pode criar funcionários. O superAdmin do próprio restaurante pode criar e gerenciar admins e funcionários.
       security: [{ BearerAuth: [] }]
       parameters: [{ $ref: '#/components/parameters/RestaurantId' }]
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/UserInput' } } }
       responses:
-        '201': { description: Usuário criado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '201': { description: UsuÃ¡rio criado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
 
   /api/v1/restaurants/{restaurant_slug}/users/{id}:
     patch:
-      tags: [Usuários]
-      summary: Atualiza usuário e permissões no restaurante
+      tags: [UsuÃ¡rios]
+      summary: Atualiza usuÃ¡rio e permissÃµes no restaurante
       security: [{ BearerAuth: [] }]
       parameters:
         - { name: restaurant_slug, in: path, required: true, schema: { type: string } }
@@ -96,33 +93,33 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/UserInput' } } }
       responses:
-        '200': { description: Usuário atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '200': { description: UsuÃ¡rio atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
     delete:
-      tags: [Usuários]
-      summary: Exclui usuário do restaurante
+      tags: [UsuÃ¡rios]
+      summary: Exclui usuÃ¡rio do restaurante
       security: [{ BearerAuth: [] }]
       parameters:
         - { name: restaurant_slug, in: path, required: true, schema: { type: string } }
         - { $ref: '#/components/parameters/Id' }
       responses:
-        '204': { description: Usuário excluído }
+        '204': { description: UsuÃ¡rio excluÃ­do }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
   /api/v1/users/{id}:
     patch:
-      tags: [Usuários]
-      summary: Atualiza usuário e permissões
+      tags: [UsuÃ¡rios]
+      summary: Atualiza usuÃ¡rio e permissÃµes
       security: [{ BearerAuth: [] }]
       parameters: [{ $ref: '#/components/parameters/Id' }]
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/UserInput' } } }
       responses:
-        '200': { description: Usuário atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '200': { description: UsuÃ¡rio atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -130,7 +127,7 @@ paths:
   /api/v1/categories:
     get:
       tags: [Categorias]
-      summary: Lista categorias (público)
+      summary: Lista categorias (pÃºblico)
       responses: { '200': { description: Categorias } }
     post:
       tags: [Categorias]
@@ -147,7 +144,7 @@ paths:
   /api/v1/categories/{id}:
     get:
       tags: [Categorias]
-      summary: Exibe categoria (público)
+      summary: Exibe categoria (pÃºblico)
       parameters: [{ $ref: '#/components/parameters/Id' }]
       responses: { '200': { description: Categoria }, '404': { $ref: '#/components/responses/NotFound' } }
     patch:
@@ -169,7 +166,7 @@ paths:
   /api/v1/products:
     get:
       tags: [Produtos]
-      summary: Lista produtos disponíveis (público)
+      summary: Lista produtos disponÃ­veis (pÃºblico)
       parameters: [{ in: query, name: category_id, schema: { type: integer } }]
       responses: { '200': { description: Produtos } }
     post:
@@ -183,7 +180,7 @@ paths:
   /api/v1/products/{id}:
     get:
       tags: [Produtos]
-      summary: Exibe produto (público)
+      summary: Exibe produto (pÃºblico)
       parameters: [{ $ref: '#/components/parameters/Id' }]
       responses: { '200': { description: Produto }, '404': { $ref: '#/components/responses/NotFound' } }
     patch:
@@ -211,7 +208,7 @@ paths:
       responses: { '200': { description: Pedidos }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' } }
     post:
       tags: [Pedidos]
-      summary: Cria pedido delivery ou presencial (público)
+      summary: Cria pedido delivery ou presencial (pÃºblico)
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/OrderInput' } } }
@@ -261,6 +258,19 @@ components:
     Session:
       type: object
       properties: { token: { type: string }, user: { $ref: '#/components/schemas/User' } }
+    RestaurantCreationInput:
+      type: object
+      required: [restaurant, super_admin]
+      properties:
+        restaurant: { $ref: '#/components/schemas/RestaurantInput' }
+        super_admin:
+          type: object
+          required: [name, email, password]
+          properties:
+            name: { type: string }
+            email: { type: string, format: email }
+            password: { type: string, format: password }
+            password_confirmation: { type: string, format: password }
     RestaurantInput:
       type: object
       required: [restaurant]
@@ -284,7 +294,7 @@ components:
             email: { type: string, format: email }
             password: { type: string, format: password }
             password_confirmation: { type: string, format: password }
-            role: { type: string, enum: [superAdmin, admin, funcionario] }
+            role: { type: string, enum: [admin, funcionario] }
             permissions: { type: object, additionalProperties: { type: boolean }, example: { 'orders:read': true, 'orders:update': true } }
     User:
       type: object
@@ -294,7 +304,7 @@ components:
         email: { type: string, format: email }
         role: { type: string, enum: [superAdmin, admin, funcionario] }
         permissions: { type: object, additionalProperties: { type: boolean } }
-        restaurant_id: { type: integer, nullable: true }
+        restaurant_id: { type: integer }
     CategoryInput:
       type: object
       required: [category]
@@ -330,7 +340,7 @@ components:
       type: object
       properties: { error: { type: string }, messages: { type: array, items: { type: string } } }
   responses:
-    Unauthorized: { description: Autenticação necessária, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-    Forbidden: { description: Sem permissão para executar a operação, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-    NotFound: { description: Recurso não encontrado, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-    ValidationError: { description: Entrada inválida, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    Unauthorized: { description: AutenticaÃ§Ã£o necessÃ¡ria, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    Forbidden: { description: Sem permissÃ£o para executar a operaÃ§Ã£o, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    NotFound: { description: Recurso nÃ£o encontrado, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    ValidationError: { description: Entrada invÃ¡lida, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }

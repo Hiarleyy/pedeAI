@@ -1,4 +1,4 @@
-module Api
+﻿module Api
   module V1
     class OrdersController < ApplicationController
       include Authenticatable
@@ -11,10 +11,10 @@ module Api
         orders = orders.where(status: params[:status]) if params[:status].present?
         render json: orders.as_json(methods: :table_label, include: { order_items: { include: :product } })
       end
-      def show = render json: Order.includes(order_items: :product).find(params[:id]).as_json(methods: :table_label, include: { order_items: { include: :product } })
+      def show = render json: manageable_scope(Order).includes(order_items: :product).find(params[:id]).as_json(methods: :table_label, include: { order_items: { include: :product } })
       def create
         order = Order.new(order_params.except(:items))
-        order.restaurant = accessible_restaurant if params[:restaurant_slug].present?
+        order.restaurant = Restaurant.find_by!(slug: params[:restaurant_slug]) if params[:restaurant_slug].present?
         order.order_items = Array(order_params[:items]).map do |item|
           product = if order.restaurant_id
                       Product.where(restaurant_id: order.restaurant_id).find(item[:product_id])
@@ -35,7 +35,7 @@ module Api
       def order_params = params.require(:order).permit(:customer_name, :customer_phone, :order_type, :delivery_address, :table_number, :payment_method, items: %i[product_id quantity])
 
       def manageable_scope(model)
-        params[:restaurant_slug].present? ? model.where(restaurant: accessible_restaurant) : (current_user.super_admin? ? model.all : model.where(restaurant: current_user.restaurant))
+        params[:restaurant_slug].present? ? model.where(restaurant: accessible_restaurant) : model.where(restaurant: current_user.restaurant)
       end
     end
   end
