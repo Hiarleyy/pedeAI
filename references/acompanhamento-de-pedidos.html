@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Gerenciador de Pedidos - pedeAi</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Montserrat:wght@600;700;900&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#dadff3",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-bright": "#f8f9fa",
+                        "on-secondary-fixed-variant": "#414756",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed": "#271900",
+                        "secondary-fixed": "#dde2f6",
+                        "on-tertiary-container": "#fffbff",
+                        "outline": "#916f65",
+                        "surface-container-high": "#e7e8e9",
+                        "tertiary-fixed": "#ffdea8",
+                        "surface": "#f8f9fa",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#5e4200",
+                        "tertiary-container": "#986d00",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed-dim": "#ffba20",
+                        "primary-fixed": "#ffdbd0",
+                        "on-surface-variant": "#5c4037",
+                        "tertiary": "#795600",
+                        "outline-variant": "#e6beb2",
+                        "primary": "#a93100",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-surface": "#191c1d",
+                        "on-secondary-container": "#5d6273",
+                        "inverse-surface": "#2e3132",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#d34000",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "background": "#f8f9fa",
+                        "secondary-fixed-dim": "#c1c6d9",
+                        "on-secondary-fixed": "#151b29",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#edeeef",
+                        "surface-dim": "#d9dadb",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#842500",
+                        "inverse-primary": "#ffb59e",
+                        "on-background": "#191c1d",
+                        "secondary": "#585e6f",
+                        "surface-variant": "#e1e3e4",
+                        "on-primary-container": "#fffbff",
+                        "surface-tint": "#ad3300",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f3f4f5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "stack-sm": "8px",
+                        "container-padding-desktop": "48px",
+                        "gutter": "16px",
+                        "stack-lg": "32px",
+                        "container-padding-mobile": "16px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Montserrat"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Montserrat"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-xl": ["Montserrat"],
+                        "label-md": ["Inter"],
+                        "headline-lg-mobile": ["Montserrat"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .kanban-scroll::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .kanban-scroll::-webkit-scrollbar-track {
+            background: theme('colors.surface-container-low');
+            border-radius: 4px;
+        }
+
+        .kanban-scroll::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant');
+            border-radius: 4px;
+        }
+
+        .kanban-scroll::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline-variant');
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+    <!-- Side Navigation -->
+    <aside
+        class="w-64 bg-surface h-screen sticky top-0 border-r border-surface-variant flex flex-col shadow-md shrink-0">
+        <div class="p-stack-lg border-b border-surface-variant flex items-center justify-between">
+            <div class="font-headline-md text-headline-md text-primary font-black flex items-center gap-2">
+                <span class="material-symbols-outlined text-3xl"
+                    style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+                pedeAi
+            </div>
+        </div>
+        <div class="p-stack-md flex items-center gap-3 border-b border-surface-variant bg-surface-container-lowest">
+            <div
+                class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">
+                SU
+            </div>
+            <div>
+                <p class="font-label-md text-label-md text-on-surface">SuperAdmin</p>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Painel Gerencial</p>
+            </div>
+        </div>
+        <nav class="flex-1 py-stack-md flex flex-col gap-stack-sm overflow-y-auto">
+            <a class="flex items-center gap-stack-md text-on-surface-variant hover:bg-surface-variant rounded-lg p-stack-md mx-2 transition-all hover:translate-x-1 duration-200"
+                href="#">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-md text-label-md">Painel</span>
+            </a>
+            <a class="flex items-center gap-stack-md bg-primary-container text-on-primary-container rounded-lg p-stack-md mx-2 shadow-sm transition-all hover:translate-x-1 duration-200"
+                href="#">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">list_alt</span>
+                <span class="font-label-md text-label-md flex-1">Pedidos</span>
+                <span class="bg-error text-on-error text-xs font-bold px-2 py-0.5 rounded-full">3</span>
+            </a>
+            <a class="flex items-center gap-stack-md text-on-surface-variant hover:bg-surface-variant rounded-lg p-stack-md mx-2 transition-all hover:translate-x-1 duration-200"
+                href="#">
+                <span class="material-symbols-outlined">fastfood</span>
+                <span class="font-label-md text-label-md">Produtos</span>
+            </a>
+            <a class="flex items-center gap-stack-md text-on-surface-variant hover:bg-surface-variant rounded-lg p-stack-md mx-2 transition-all hover:translate-x-1 duration-200"
+                href="#">
+                <span class="material-symbols-outlined">group</span>
+                <span class="font-label-md text-label-md">Usuários</span>
+            </a>
+            <a class="flex items-center gap-stack-md text-on-surface-variant hover:bg-surface-variant rounded-lg p-stack-md mx-2 transition-all hover:translate-x-1 duration-200"
+                href="#">
+                <span class="material-symbols-outlined">category</span>
+                <span class="font-label-md text-label-md">Categorias</span>
+            </a>
+        </nav>
+        <div class="p-stack-md border-t border-surface-variant text-center">
+            <p class="font-label-sm text-label-sm text-on-surface-variant flex items-center justify-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Ativo (10s)
+            </p>
+        </div>
+    </aside>
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-background">
+        <!-- Header -->
+        <header
+            class="bg-surface border-b border-surface-variant p-stack-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-stack-md z-10 shrink-0">
+            <div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">Gerenciador de Pedidos</h1>
+
+            </div>
+            <div class="flex items-center gap-stack-md w-full md:w-auto">
+                <div class="relative flex-1 md:w-64">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                    <input
+                        class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-sm text-body-sm transition-colors"
+                        placeholder="Buscar pedido # ou cliente" type="text">
+                </div>
+                <button
+                    class="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant text-on-surface px-4 py-2 rounded-lg hover:bg-surface-variant transition-colors font-label-md text-label-md whitespace-nowrap shadow-sm">
+                    <span class="material-symbols-outlined">refresh</span>
+                    Atualizar
+                </button>
+            </div>
+        </header>
+        <!-- Kanban Board -->
+        <div class="flex-1 p-gutter overflow-x-auto kanban-scroll flex gap-gutter items-start">
+            <!-- Column: Pendente -->
+            <div
+                class="w-80 shrink-0 flex flex-col max-h-full bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm">
+                <div
+                    class="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container rounded-t-xl">
+                    <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-error"></span>
+                        Pendente
+                    </h2>
+                    <span
+                        class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-md">2</span>
+                </div>
+                <div class="p-3 flex-1 overflow-y-auto kanban-scroll flex flex-col gap-3">
+                    <!-- Card 1 -->
+                    <div
+                        class="bg-surface border border-outline-variant rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-label-md text-label-md text-on-surface-variant">#1024</span>
+                            <span
+                                class="font-label-sm text-label-sm text-error bg-error-container px-2 py-0.5 rounded-md">10
+                                min</span>
+                        </div>
+                        <h3 class="font-label-md text-label-md text-on-surface mb-3">João Silva</h3>
+                        <div class="bg-surface-container-low p-2 rounded-md mb-3">
+                            <p class="font-body-sm text-body-sm text-on-surface flex justify-between"><span class="">1x
+                                    Pizza Calabresa G</span> <span class="font-bold">R$ 65,90</span></p>
+                            <p class="font-body-sm text-body-sm text-on-surface flex justify-between"><span class="">1x
+                                    Coca-Cola 2L</span> <span class="font-bold">R$ 12,00</span></p>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-1 text-on-surface-variant">
+                                <span class="material-symbols-outlined text-sm">payments</span>
+                                <span class="font-label-sm text-label-sm">Pix</span>
+                            </div>
+                            <div class="font-headline-md text-headline-md text-primary">R$ 77,90</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                class="flex-1 bg-primary text-on-primary font-label-md text-label-md py-2 rounded-md hover:bg-primary-container transition-colors shadow-sm">Confirmar</button>
+                            <button
+                                class="px-3 border border-outline-variant text-error font-label-md text-label-md rounded-md hover:bg-error-container transition-colors"><span
+                                    class="material-symbols-outlined mt-1">close</span></button>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div
+                        class="bg-surface border border-outline-variant rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-label-md text-label-md text-on-surface-variant">#1025</span>
+                            <span
+                                class="font-label-sm text-label-sm text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded-md">Agora</span>
+                        </div>
+                        <h3 class="font-label-md text-label-md text-on-surface mb-3">Maria Oliveira</h3>
+                        <div class="bg-surface-container-low p-2 rounded-md mb-3">
+                            <p class="font-body-sm text-body-sm text-on-surface flex justify-between"><span class="">2x
+                                    Burger Clássico</span> <span class="font-bold">R$ 56,00</span></p>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-1 text-on-surface-variant">
+                                <span class="material-symbols-outlined text-sm">credit_card</span>
+                                <span class="font-label-sm text-label-sm">Cartão</span>
+                            </div>
+                            <div class="font-headline-md text-headline-md text-primary">R$ 56,00</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                class="flex-1 bg-primary text-on-primary font-label-md text-label-md py-2 rounded-md hover:bg-primary-container transition-colors shadow-sm">Confirmar</button>
+                            <button
+                                class="px-3 border border-outline-variant text-error font-label-md text-label-md rounded-md hover:bg-error-container transition-colors"><span
+                                    class="material-symbols-outlined mt-1">close</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Column: Confirmado -->
+            <div
+                class="w-80 shrink-0 flex flex-col max-h-full bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm">
+                <div
+                    class="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container rounded-t-xl">
+                    <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-tertiary-fixed-dim"></span>
+                        Confirmado
+                    </h2>
+                    <span
+                        class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-md">1</span>
+                </div>
+                <div class="p-3 flex-1 overflow-y-auto kanban-scroll flex flex-col gap-3">
+                    <!-- Card 3 -->
+                    <div
+                        class="bg-surface border border-outline-variant rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-label-md text-label-md text-on-surface-variant">#1022</span>
+                        </div>
+                        <h3 class="font-label-md text-label-md text-on-surface mb-3">Carlos Santos</h3>
+                        <div class="bg-surface-container-low p-2 rounded-md mb-3">
+                            <p class="font-body-sm text-body-sm text-on-surface flex justify-between"><span class="">1x
+                                    Sushi Combo 30</span> <span class="font-bold">R$ 89,90</span></p>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-1 text-on-surface-variant">
+                                <span class="material-symbols-outlined text-sm">payments</span>
+                                <span class="font-label-sm text-label-sm">Pix</span>
+                            </div>
+                            <div class="font-headline-md text-headline-md text-primary">R$ 89,90</div>
+                        </div>
+                        <button
+                            class="w-full border border-primary text-primary font-label-md text-label-md py-2 rounded-md hover:bg-primary-fixed transition-colors">Iniciar
+                            Preparo</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Column: Em Preparo -->
+            <div
+                class="w-80 shrink-0 flex flex-col max-h-full bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm">
+                <div
+                    class="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container rounded-t-xl">
+                    <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-primary-container"></span>
+                        Em Preparo
+                    </h2>
+                    <span
+                        class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-md">1</span>
+                </div>
+                <div class="p-3 flex-1 overflow-y-auto kanban-scroll flex flex-col gap-3">
+                    <!-- Card 4 -->
+                    <div
+                        class="bg-surface border border-outline-variant rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-label-md text-label-md text-on-surface-variant">#1020</span>
+                            <span
+                                class="font-label-sm text-label-sm text-primary bg-primary-fixed px-2 py-0.5 rounded-md">15
+                                min</span>
+                        </div>
+                        <h3 class="font-label-md text-label-md text-on-surface mb-3">Ana Costa</h3>
+                        <div class="bg-surface-container-low p-2 rounded-md mb-3">
+                            <p class="font-body-sm text-body-sm text-on-surface flex justify-between"><span class="">2x
+                                    Açaí 500ml</span> <span class="font-bold">R$ 44,00</span></p>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center gap-1 text-on-surface-variant">
+                                <span class="material-symbols-outlined text-sm">money</span>
+                                <span class="font-label-sm text-label-sm">Dinheiro</span>
+                            </div>
+                            <div class="font-headline-md text-headline-md text-primary">R$ 44,00</div>
+                        </div>
+                        <button
+                            class="w-full border border-primary text-primary font-label-md text-label-md py-2 rounded-md hover:bg-primary-fixed transition-colors">Marcar
+                            como Pronto</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Column: Pronto -->
+            <div
+                class="w-80 shrink-0 flex flex-col max-h-full bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm opacity-60 hover:opacity-100 transition-opacity">
+                <div
+                    class="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container rounded-t-xl">
+                    <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        Pronto
+                    </h2>
+                    <span
+                        class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-md">0</span>
+                </div>
+                <div
+                    class="p-3 flex-1 overflow-y-auto kanban-scroll flex flex-col gap-3 min-h-[100px] items-center justify-center">
+                    <p class="text-on-surface-variant font-body-sm text-body-sm text-center">Nenhum pedido pronto no
+                        momento.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+</body>
+
+</html>

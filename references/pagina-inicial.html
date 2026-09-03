@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Cardápio - pedeAi</title>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Montserrat:wght@100..900&display=swap"
+        rel="stylesheet" />
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#e6beb2",
+                        "on-background": "#191c1d",
+                        "secondary": "#585e6f",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#5d6273",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#842500",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#ffb59e",
+                        "tertiary-container": "#986d00",
+                        "surface-container-high": "#e7e8e9",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container": "#edeeef",
+                        "outline": "#916f65",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#fffbff",
+                        "surface-dim": "#d9dadb",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-variant": "#e1e3e4",
+                        "surface-tint": "#ad3300",
+                        "on-secondary-fixed-variant": "#414756",
+                        "primary-container": "#d34000",
+                        "secondary-fixed-dim": "#c1c6d9",
+                        "on-surface": "#191c1d",
+                        "primary-fixed-dim": "#ffb59e",
+                        "inverse-on-surface": "#f0f1f2",
+                        "inverse-surface": "#2e3132",
+                        "on-surface-variant": "#5c4037",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "primary": "#a93100",
+                        "tertiary": "#795600",
+                        "on-secondary-fixed": "#151b29",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9fa",
+                        "on-tertiary-fixed-variant": "#5e4200",
+                        "primary-fixed": "#ffdbd0",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface": "#f8f9fa",
+                        "tertiary-fixed-dim": "#ffba20",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed": "#271900",
+                        "secondary-fixed": "#dde2f6",
+                        "tertiary-fixed": "#ffdea8",
+                        "surface-bright": "#f8f9fa",
+                        "secondary-container": "#dadff3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "unit": "8px",
+                        "container-padding-mobile": "16px",
+                        "gutter": "16px",
+                        "container-padding-desktop": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Montserrat"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg-mobile": ["Montserrat"],
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-xl": ["Montserrat"],
+                        "headline-md": ["Montserrat"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
+    <!-- TopNavBar (Shared Component) -->
+    <nav class="bg-surface w-full top-0 sticky border-b border-surface-variant shadow-sm z-50">
+        <div class="flex justify-between items-center h-16 px-container-padding-desktop max-w-7xl mx-auto">
+            <!-- Brand -->
+            <div class="flex items-center gap-4">
+                <span class="text-headline-md font-headline-md font-black text-primary">pedeAi</span>
+            </div>
+            <!-- Links (Desktop) -->
+            <div class="hidden md:flex gap-stack-lg h-full items-center">
+                <a class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary pb-1 h-full flex items-center mt-[2px]"
+                    href="#">Restaurantes</a>
+                <a class="font-label-md text-label-md text-secondary hover:text-primary transition-colors h-full flex items-center"
+                    href="#">Ofertas</a>
+                <a class="font-label-md text-label-md text-secondary hover:text-primary transition-colors h-full flex items-center"
+                    href="#">Pedidos</a>
+            </div>
+            <!-- Actions -->
+            <div class="flex items-center gap-stack-md">
+                <button
+                    class="p-2 hover:bg-surface-container-low rounded-lg transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary">shopping_cart</span>
+                </button>
+                <button
+                    class="p-2 hover:bg-surface-container-low rounded-lg transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined text-secondary hover:text-primary">account_circle</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <!-- Restaurant Banner -->
+    <header class="w-full h-[300px] relative bg-surface-variant">
+        <img class="w-full h-full object-cover"
+            data-alt="A stunning, wide-angle architectural photograph of a modern Italian restaurant interior. The scene features warm, amber pendant lighting casting a soft glow over rustic wooden tables and clean white brick walls. A beautifully set table in the foreground holds a partially visible, steaming pasta dish, inviting the viewer in. The overall mood is high-energy, warm, and sophisticated, embodying a tactile, premium dining experience."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtKQn-3H5Rir2k2FWdxyYb95mJhddZKHTr8NaLvUlOu4TIWjPYhsWK9emAYYD05pmqbuXETZ7ZTLGSRU5yPBTncmXvErrKsyugbVBwsXhaR-aDfTMY5F7cOCrhJFrN1jjT-shIbZWlHubAeuH0SOCEFzuUfHIe9KXcUV_wV29EiWK-xtDk-Y0pVcUM_N4b_MDkgH6rALmF6-oeeqV7skoeJGXKmwKbXhTxgI_uG2FceYzIg4gIXkmd" />
+        <div
+            class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end px-container-padding-mobile md:px-container-padding-desktop pb-stack-lg">
+            <div class="max-w-7xl mx-auto w-full">
+                <h1 class="font-headline-xl text-headline-xl text-white drop-shadow-md">Nonna's Trattoria</h1>
+                <p class="font-body-lg text-body-lg text-surface-container-low mt-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-tertiary-fixed"
+                        style="font-variation-settings: 'FILL' 1;">star</span>
+                    4.9 (500+ avaliações) • Italiana • Massas
+                </p>
+            </div>
+        </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main
+        class="flex-1 w-full max-w-7xl mx-auto px-container-padding-mobile md:px-container-padding-desktop py-stack-lg grid grid-cols-1 md:grid-cols-12 gap-gutter relative">
+        <!-- Left Sidebar (Menu Categories) -->
+        <aside class="hidden md:block md:col-span-3 lg:col-span-2">
+            <div class="sticky top-24 bg-surface rounded-xl border border-surface-variant p-4 shadow-sm">
+                <h2 class="font-headline-md text-headline-md text-on-surface mb-stack-md">Categorias</h2>
+                <ul class="flex flex-col gap-2">
+                    <li><a class="block py-2 px-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md transition-colors"
+                            href="#entradas">Entradas</a></li>
+                    <li><a class="block py-2 px-3 rounded-lg text-on-surface-variant hover:bg-surface-variant font-label-md text-label-md transition-colors"
+                            href="#principais">Pratos Principais</a></li>
+                    <li><a class="block py-2 px-3 rounded-lg text-on-surface-variant hover:bg-surface-variant font-label-md text-label-md transition-colors"
+                            href="#bebidas">Bebidas</a></li>
+                    <li><a class="block py-2 px-3 rounded-lg text-on-surface-variant hover:bg-surface-variant font-label-md text-label-md transition-colors"
+                            href="#sobremesas">Sobremesas</a></li>
+                </ul>
+            </div>
+        </aside>
+        <!-- Center Grid (Menu Items) -->
+        <section class="col-span-1 md:col-span-6 lg:col-span-7 flex flex-col gap-stack-lg">
+            <!-- Category Section: Entradas -->
+            <div id="entradas">
+                <h3
+                    class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-stack-md border-b border-surface-variant pb-2">
+                    Entradas</h3>
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-stack-md">
+                    <!-- Item Card -->
+                    <div
+                        class="bg-surface rounded-xl border border-surface-variant overflow-hidden flex flex-row shadow-sm hover:shadow-[0px_8px_30px_rgba(18,24,38,0.12)] transition-shadow group">
+                        <div class="w-1/3 h-full min-h-[120px] bg-surface-variant">
+                            <img class="w-full h-full object-cover"
+                                data-alt="A close-up, highly appetizing macro photograph of crispy bruschetta on a rustic wooden board. The toasted bread is piled high with bright, glistening red tomatoes, vibrant green basil leaves, and drizzled with thick balsamic glaze. The lighting is bright and directional, emphasizing the fresh, tactile textures of the ingredients. The background is softly blurred to maintain focus on the colorful, mouth-watering appetizer."
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKXe_CJG-dzxE3e_ajSMU42LI252RLoxgs6g_qQt-yCOo6BszwQT7-5H1Il_LrhD3N_ojCaA7FKjntJp6BPAZI4_YGBh8Pfq-7I2YShm_UdPmTK9bCNyHR9_DvKLoP8E-IzUxmpdE4D_bG7XFXDfbSKqncKtiC0h9ol9czd2wXfwSPKOP8o5fJjcfKGST3mkQSQQeeys0zH59R8SndaqAlXG9tpX0O3V3KUo8OWYoYXqU5xjhv01Il" />
+                        </div>
+                        <div class="p-4 flex flex-col justify-between w-2/3">
+                            <div>
+                                <h4 class="font-label-md text-label-md text-on-surface mb-1">Bruschetta Tradicional</h4>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Pão italiano
+                                    tostado com alho, tomates frescos, manjericão e azeite extravirgem.</p>
+                            </div>
+                            <div class="flex justify-between items-center mt-3">
+                                <span class="font-label-md text-label-md text-primary">R$ 24,00</span>
+                                <button
+                                    class="w-8 h-8 rounded-full bg-surface-variant text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">add</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Item Card -->
+                    <div
+                        class="bg-surface rounded-xl border border-surface-variant overflow-hidden flex flex-row shadow-sm hover:shadow-[0px_8px_30px_rgba(18,24,38,0.12)] transition-shadow group">
+                        <div class="w-1/3 h-full min-h-[120px] bg-surface-variant">
+                            <img class="w-full h-full object-cover"
+                                data-alt="A professional food photograph of golden-brown, crispy arancini balls served on an elegant white ceramic plate. The rice balls are garnished with a dusting of parmesan cheese and rest on a smooth swirl of rich, red marinara sauce. Soft, warm natural light highlights the crunchy exterior, while the overall aesthetic remains clean, modern, and highly appetizing."
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGcj9oSQq49ZyD2iw2kgh_ss2gAOKMrWPX44EXJ9PfsQTk-y7TfYxRSc4a5xnkaBVml3bLXx7DhABFiHeZSxcqFaUid3AmqzrVwKmfPqZBUV94VQpyy-ndwGOa7tbdMA9nbI0Hm5xWeAxwTDyqQF6A7egUx7fuSOQ48f68J7Ttsa20mEQSiOsbs_J9iXuOBerkIukR9Hnf3rhVj0VjH9bOD-7ReH6LGrU4CHQLOM-QnsS1N4qGCIxw" />
+                        </div>
+                        <div class="p-4 flex flex-col justify-between w-2/3">
+                            <div>
+                                <h4 class="font-label-md text-label-md text-on-surface mb-1">Arancini di Riso</h4>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Bolinhos de
+                                    risoto recheados com mussarela, fritos até dourar. Acompanha molho pomodoro.</p>
+                            </div>
+                            <div class="flex justify-between items-center mt-3">
+                                <span class="font-label-md text-label-md text-primary">R$ 32,00</span>
+                                <button
+                                    class="w-8 h-8 rounded-full bg-surface-variant text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">add</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Category Section: Pratos Principais -->
+            <div class="mt-stack-md" id="principais">
+                <h3
+                    class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-stack-md border-b border-surface-variant pb-2">
+                    Pratos Principais</h3>
+                <div class="grid grid-cols-1 gap-stack-md">
+                    <!-- Large Item Card -->
+                    <div
+                        class="bg-surface rounded-xl border border-surface-variant overflow-hidden flex flex-col sm:flex-row shadow-sm hover:shadow-[0px_8px_30px_rgba(18,24,38,0.12)] transition-shadow">
+                        <div class="w-full sm:w-2/5 h-48 sm:h-auto bg-surface-variant">
+                            <img class="w-full h-full object-cover"
+                                data-alt="An overhead, editorial-style photograph of a steaming plate of Spaghetti Carbonara. The thick strands of pasta are coated in a glossy, rich yellow sauce, punctuated by crisp, dark pieces of guanciale and generous cracks of black pepper. The plate sits on a minimalist gray slate table, emphasizing the vibrant, warm colors of the food. The lighting is soft but precise, creating a highly tactile and mouth-watering visual."
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjLe0SznqPmvggqinH3bQDE4Y6D8GisfWu2wSgnPO3IAlfs3nPF9dPEqhwTRq9rfcbbhVshaXfGDhKwHwuqry1UGBVsJDLB91stFiEm-B8HAtvavMZ0SkBrMTRRB2P2t8dCBHd47mRDv_wAo5JE89KJoX0_QOIQO4KO22DnElg510g4FDXYWK0yEyABcoAmoh8f9W_nMau9jlJ2ABJhrv0rbUqmiUytP-loC26xVOKraxasK8Umg5t" />
+                        </div>
+                        <div class="p-4 sm:p-6 flex flex-col justify-between w-full sm:w-3/5">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-headline-md text-headline-md text-on-surface">Spaghetti Carbonara
+                                    </h4>
+                                    <span
+                                        class="px-2 py-1 bg-surface-container-high rounded-full font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1"><span
+                                            class="material-symbols-outlined text-[14px]">local_fire_department</span>
+                                        Mais Pedido</span>
+                                </div>
+                                <p class="font-body-md text-body-md text-on-surface-variant mb-4">Receita clássica
+                                    romana com guanciale artesanal, gemas de ovos caipiras, queijo pecorino romano e
+                                    pimenta preta moída na hora. Cremoso e irresistível.</p>
+                            </div>
+                            <div class="flex justify-between items-center mt-auto border-t border-surface-variant pt-4">
+                                <span class="font-headline-md text-headline-md text-primary">R$ 58,00</span>
+                                <button
+                                    class="px-6 py-3 rounded-lg bg-primary text-white font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors flex items-center gap-2 shadow-sm">
+                                    <span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+                                    Adicionar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Right Sidebar (Mini-cart) -->
+        <aside class="col-span-1 md:col-span-3 lg:col-span-3 hidden md:block">
+            <div
+                class="sticky top-24 bg-surface rounded-xl border border-surface-variant shadow-[0px_4px_20px_rgba(18,24,38,0.06)] flex flex-col h-[calc(100vh-8rem)]">
+                <!-- Cart Header -->
+                <div class="p-4 border-b border-surface-variant bg-surface-container-lowest rounded-t-xl">
+                    <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">shopping_basket</span>
+                        Seu Pedido
+                    </h2>
+                    <p class="font-body-sm text-body-sm text-secondary mt-1">Nonna's Trattoria</p>
+                </div>
+                <!-- Cart Items (Empty State for visual cleanliness, or mock items) -->
+                <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+                    <!-- Mock Cart Item -->
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <span class="font-label-md text-label-md text-on-surface">1x Spaghetti Carbonara</span>
+                            <span
+                                class="font-body-sm text-body-sm text-secondary cursor-pointer hover:underline mt-1">Editar</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-on-surface">R$ 58,00</span>
+                    </div>
+                    <div class="w-full h-[1px] bg-surface-variant"></div>
+                    <!-- Mock Cart Item 2 -->
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <span class="font-label-md text-label-md text-on-surface">1x Bruschetta Tradicional</span>
+                            <span
+                                class="font-body-sm text-body-sm text-secondary cursor-pointer hover:underline mt-1">Editar</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-on-surface">R$ 24,00</span>
+                    </div>
+                </div>
+                <!-- Cart Footer -->
+                <div class="p-4 border-t border-surface-variant bg-surface-container-low rounded-b-xl">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Subtotal</span>
+                        <span class="font-label-md text-label-md text-on-surface">R$ 82,00</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Taxa de Entrega</span>
+                        <span class="font-label-md text-label-md text-primary">Grátis</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="font-headline-md text-headline-md text-on-surface">Total</span>
+                        <span class="font-headline-md text-headline-md text-primary">R$ 82,00</span>
+                    </div>
+                    <button
+                        class="w-full py-4 rounded-lg bg-primary text-white font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors flex justify-center items-center shadow-[0px_4px_20px_rgba(211,64,0,0.4)]">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        </aside>
+        <!-- Mobile Floating Cart Button -->
+        <div class="fixed bottom-4 left-4 right-4 md:hidden z-40">
+            <button
+                class="w-full py-4 rounded-lg bg-primary text-white font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors flex justify-between items-center px-6 shadow-[0px_8px_30px_rgba(211,64,0,0.4)]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined">shopping_basket</span>
+                    <span>2 itens</span>
+                </div>
+                <span>Ver Carrinho • R$ 82,00</span>
+            </button>
+        </div>
+    </main>
+    <!-- Footer (Shared Component) -->
+    <footer class="bg-surface-container-highest w-full mt-stack-lg border-t border-outline-variant py-stack-lg">
+        <div
+            class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-container-padding-desktop max-w-7xl mx-auto items-center">
+            <div class="flex justify-center md:justify-start">
+                <span class="font-headline-md text-headline-md text-primary">pedeAi</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline decoration-primary transition-colors"
+                    href="#">Sobre nós</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline decoration-primary transition-colors"
+                    href="#">Para restaurantes</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline decoration-primary transition-colors"
+                    href="#">Termos de uso</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline decoration-primary transition-colors"
+                    href="#">Privacidade</a>
+            </div>
+            <div class="flex justify-center md:justify-end mt-4 md:mt-0">
+                <span class="font-body-sm text-body-sm text-on-surface">© 2024 pedeAi - Todos os direitos
+                    reservados.</span>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

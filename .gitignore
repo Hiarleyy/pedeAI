@@ -16,7 +16,13 @@
 !/log/.keep
 !/tmp/.keep
 
+*.json
+*.md
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/
 !/tmp/pids/.keep
+
+# Graphify
+graphify-out/
+
