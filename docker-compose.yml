@@ -13,18 +13,13 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
-  redis:
-    image: redis:7-alpine
-    ports: ["6379:6379"]
-    restart: unless-stopped
   api:
     build: .
-    command: bash -lc "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0"
+    command: bash -lc "rm -f tmp/pids/server.pid && bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0"
     volumes: [".:/app"]
     ports: ["3000:3000"]
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/pedeai_development
-      REDIS_URL: redis://redis:6379/0
       RAILS_ENV: development
     restart: unless-stopped
     healthcheck:
@@ -35,6 +30,5 @@ services:
       start_period: 30s
     depends_on:
       db: { condition: service_healthy }
-      redis: { condition: service_started }
 volumes:
   postgres_data:

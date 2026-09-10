@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env*
+log/*
+tmp/*
+test/
+spec/
+node_modules/
+graphify-out/
+openspec/
+Dockerfile*
+docker-compose*.yml

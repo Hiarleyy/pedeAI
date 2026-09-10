@@ -18,6 +18,10 @@
 
 *.json
 *.md
+!.env.example
+!deploy/
+!deploy/*.md
+!deploy/*.yml
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/
@@ -26,3 +30,13 @@
 # Graphify
 graphify-out/
 
+# Ignore image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.ico
+*.svg
+*.bmp
+*.tiff
