@@ -58,6 +58,10 @@ services:
       REDIS_URL: redis://redis:6379/0
     networks: [private]
     restart: "no"
+    deploy:
+      restart_policy:
+        condition: none
+
     depends_on:
       - db
 
@@ -96,7 +100,8 @@ services:
 
 networks:
   private:
-    driver: bridge
+    driver: overlay
+    attachable: true
 
 volumes:
   postgres_data:
