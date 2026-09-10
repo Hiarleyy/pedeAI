@@ -8,7 +8,9 @@
 /.bundle
 
 # Ignore all environment files.
-/.env*
+.env*
+!.env.example
+!deploy/.env.example
 
 # Ignore all logfiles and tempfiles.
 /log/*
@@ -18,10 +20,10 @@
 
 *.json
 *.md
-!.env.example
 !deploy/
 !deploy/*.md
 !deploy/*.yml
+
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/
