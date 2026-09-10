@@ -25,7 +25,7 @@ services:
       replicas: 1
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=plataforma-redacao-web"
+        - "traefik.swarm.network=plataforma-redacao-web"
         - "traefik.http.routers.pedeai.rule=Host(`pedeai.insilico.cloud`)"
         - "traefik.http.routers.pedeai.entrypoints=websecure"
         - "traefik.http.routers.pedeai.tls=true"

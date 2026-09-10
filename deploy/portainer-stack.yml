@@ -32,7 +32,7 @@ services:
     # Em Swarm, o Traefik lê as mesmas labels em deploy.labels abaixo.
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=plataforma-redacao-web"
+      - "traefik.swarm.network=plataforma-redacao-web"
       - "traefik.http.routers.pedeai-http.rule=Host(`pedeai.insilico.cloud`)"
       - "traefik.http.routers.pedeai-http.entrypoints=web"
       - "traefik.http.routers.pedeai-http.middlewares=pedeai-redirect-https"
@@ -52,7 +52,7 @@ services:
       replicas: 1
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=plataforma-redacao-web"
+        - "traefik.swarm.network=plataforma-redacao-web"
         - "traefik.http.routers.pedeai-http.rule=Host(`pedeai.insilico.cloud`)"
         - "traefik.http.routers.pedeai-http.entrypoints=web"
         - "traefik.http.routers.pedeai-http.middlewares=pedeai-redirect-https"
