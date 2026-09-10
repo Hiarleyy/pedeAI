@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR" class="h-full bg-gray-50">
 <head>
   <meta charset="UTF-8">
@@ -6,8 +6,13 @@
   <title>PedeAI - Painel de Gestão</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Lineicons -->
+  <link rel="stylesheet" href="https://cdn.lineicons.com/5.0/lineicons.css">
+  <!-- Google Fonts for Typography Preview -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Vue.js 3 -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script>
@@ -34,9 +39,41 @@
   </script>
   <style>
     [v-cloak] { display: none; }
+    :root { --motion-fast: 140ms; --motion-base: 220ms; --motion-ease: cubic-bezier(.2, .8, .2, 1); }
+    [data-ui-motion] button, [data-ui-motion] a, [data-ui-motion] input, [data-ui-motion] select, [data-ui-motion] textarea { transition: transform var(--motion-fast) var(--motion-ease), box-shadow var(--motion-fast) var(--motion-ease), background-color var(--motion-fast) var(--motion-ease), border-color var(--motion-fast) var(--motion-ease); }
+    [data-ui-motion] button:active:not(:disabled) { transform: scale(.98); }
+    [data-ui-motion] :focus-visible { outline: 3px solid #d97706; outline-offset: 3px; }
+    .toast-enter-active, .toast-leave-active { transition: opacity var(--motion-base) var(--motion-ease), transform var(--motion-base) var(--motion-ease); }
+    .toast-enter-from, .toast-leave-to { opacity: 0; transform: translateY(-8px); }
+    .toast-move { transition: transform var(--motion-base) var(--motion-ease); }
+    .ui-panel { animation: ui-admin-enter var(--motion-base) var(--motion-ease) both; }
+    @keyframes ui-admin-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .admin-login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2.5rem; background: #f5f5f4; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .admin-login-card { width: min(100%, 64rem); min-height: 40rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: hidden; border: 1px solid rgb(229 229 229 / .8); border-radius: 1.5rem; background: #fff; box-shadow: 0 25px 50px -12px rgb(0 0 0 / .2); }
+    .admin-login-form-column { display: flex; flex-direction: column; justify-content: space-between; padding: 3.5rem; }
+    .admin-login-brand { display: flex; align-items: center; gap: .625rem; margin-bottom: 2rem; }
+    .admin-login-brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: .75rem; background: #ff5722; color: #fff; font-weight: 800; }
+    .admin-login-brand-name { color: #18181b; font-size: 1.125rem; font-weight: 800; letter-spacing: -.025em; }
+    .admin-login-badge { border-radius: .375rem; background: #fff7ed; color: #c2410c; padding: .25rem .5rem; font-size: .6875rem; font-weight: 700; }
+    .admin-login-heading { color: #18181b; font-size: clamp(1.5rem, 2.2vw, 1.875rem); font-weight: 700; letter-spacing: -.025em; }
+    .admin-login-copy { margin-top: .5rem; color: #737373; font-size: .875rem; line-height: 1.625; }
+    .admin-login-field { display: block; width: 100%; border: 1px solid #d4d4d4; border-radius: .75rem; background: rgb(250 250 250 / .5); padding: .75rem 1rem; color: #18181b; font-size: .875rem; }
+    .admin-login-field:focus { border-color: #ff5722; background: #fff; outline: none; box-shadow: 0 0 0 3px rgb(255 87 34 / .2); }
+    .admin-login-submit { display: flex; width: 100%; align-items: center; justify-content: center; gap: .5rem; border: 0; border-radius: .75rem; background: #ff5722; padding: .875rem 1rem; color: #fff; font-size: .875rem; font-weight: 600; cursor: pointer; transition: background-color .2s ease, transform .2s ease; }
+    .admin-login-submit:hover:not(:disabled) { background: #ea580c; }
+    .admin-login-submit:active:not(:disabled) { transform: scale(.99); }
+    .admin-login-submit:disabled { cursor: not-allowed; opacity: .65; }
+    .admin-login-visual { position: relative; min-height: 40rem; overflow: hidden; border-left: 1px solid rgb(229 229 229 / .6); background: #18181b; }
+    .admin-login-visual img { width: 100%; height: 100%; object-fit: cover; }
+    .admin-login-visual::after { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(24 24 27 / .02), rgb(24 24 27 / .3)); content: ''; pointer-events: none; }
+    .admin-login-legal { margin-top: 2rem; border-top: 1px solid #f5f5f4; padding-top: 1.5rem; text-align: center; color: #a3a3a3; font-size: .75rem; line-height: 1.5; }
+    .admin-login-legal a { color: #737373; text-decoration: underline; text-underline-offset: 2px; }
+    @media (max-width: 1023px) { .admin-login-page { padding: 1.5rem; } .admin-login-card { grid-template-columns: 1fr; min-height: auto; max-width: 35rem; } .admin-login-form-column { padding: 2rem; } .admin-login-visual { display: none; } }
+    @media (max-width: 480px) { .admin-login-page { padding: 1rem; } .admin-login-form-column { padding: 1.5rem; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
   </style>
 </head>
-<body class="h-full flex flex-col text-gray-800 antialiased">
+<body data-ui-motion="enabled" class="h-full flex flex-col text-gray-800 antialiased">
   <div id="app" v-cloak class="flex flex-col min-h-full">
     
     <!-- Toast Notifications -->
@@ -51,31 +88,31 @@
                'bg-blue-50 border-blue-200 text-blue-800': toast.type === 'info'
              }">
           <i :class="{
-            'fa-solid fa-circle-check text-green-500 text-lg': toast.type === 'success',
-            'fa-solid fa-circle-xmark text-red-500 text-lg': toast.type === 'error',
-            'fa-solid fa-circle-exclamation text-amber-500 text-lg': toast.type === 'warning',
-            'fa-solid fa-circle-info text-blue-500 text-lg': toast.type === 'info'
+            'lni lni-check-circle-1 text-green-500 text-lg': toast.type === 'success',
+            'lni lni-xmark-circle text-red-500 text-lg': toast.type === 'error',
+            'lni lni-info text-amber-500 text-lg': toast.type === 'warning',
+            'lni lni-info text-blue-500 text-lg': toast.type === 'info'
           }"></i>
           <span>{{ toast.message }}</span>
           <button @click="removeToast(toast.id)" class="ml-auto text-gray-400 hover:text-gray-600">
-            <i class="fa-solid fa-xmark"></i>
+            <i class="lni lni-xmark"></i>
           </button>
         </div>
       </transition-group>
     </div>
 
     <!-- Admin Header -->
-    <header v-if="!adminAuth.token" class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+    <header v-if="false" aria-hidden="true" class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
           <div class="flex items-center gap-2">
-            <span class="text-2xl">ðŸ”</span>
+            <i class="lni lni-shield-2 text-2xl text-primary-600" aria-hidden="true"></i>
             <span class="text-xl font-bold tracking-tight text-gray-900">Pede<span class="text-primary-600">AI</span></span>
-            <span class="px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 rounded">Painel Gerencial</span>
+            <span class="px-2 py-0.5 text-xs font-semibold bg-primary-100 text-primary-700 rounded">Painel Gerencial</span>
           </div>
           <div>
             <a href="/" class="text-xs text-gray-600 hover:text-primary-600 font-semibold flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
-              <i class="fa-solid fa-utensils"></i> Ver Cardápio
+              <i class="lni lni-hat-chef-3"></i> Ver Cardápio
             </a>
           </div>
         </div>
@@ -88,42 +125,43 @@
       <!-- ============================================== -->
       <!-- LOGIN SCREEN IF NOT AUTHENTICATED              -->
       <!-- ============================================== -->
-      <div v-if="!adminAuth.token" class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white border border-gray-200 shadow-xl rounded-2xl p-6 sm:p-8 w-full max-w-md">
-          <div class="text-center mb-6">
-            <span class="text-4xl">ðŸ”‘</span>
-            <h2 class="text-2xl font-black text-gray-900 mt-2">Acesso ao Painel</h2>
-            <p class="text-gray-500 text-sm mt-1">Faça login com as credenciais do sistema</p>
-          </div>
+      <div v-if="!adminAuth.token" class="admin-login-page">
+        <div class="admin-login-card" data-purpose="admin-login-split-screen">
+          <section class="admin-login-form-column" aria-labelledby="admin-login-heading">
+          <div>
+            <header class="admin-login-brand" data-purpose="admin-login-brand">
+              <span class="admin-login-brand-mark" aria-hidden="true">pA</span>
+              <span class="admin-login-brand-name">pede<span class="text-orange-600">AI</span></span>
+              <span class="admin-login-badge">Painel do restaurante</span>
+            </header>
+            <div class="mb-8" data-purpose="admin-login-heading-group">
+              <h1 id="admin-login-heading" class="admin-login-heading">Bem-vindo de volta</h1>
+              <p class="admin-login-copy">Acesse seu painel inteligente para gerenciar pedidos, cardápio online e delivery em tempo real.</p>
+            </div>
 
           <!-- Login Form -->
-          <form @submit.prevent="login" class="space-y-4">
+          <form @submit.prevent="login" class="space-y-4" data-purpose="admin-login-form">
             <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-1">E-mail</label>
-              <input type="email" v-model="adminAuth.email" required placeholder="superadmin@forno-e-massa.pedeai.test"
-                     class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
+              <label for="admin-login-email" class="block mb-1.5 text-xs font-bold uppercase tracking-wider text-neutral-700">E-mail corporativo ou de acesso</label>
+              <input id="admin-login-email" name="email" type="email" autocomplete="username" v-model="adminAuth.email" required placeholder="seuemail@restaurante.com.br" class="admin-login-field">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-1">Senha</label>
-              <input type="password" v-model="adminAuth.password" required placeholder="••••••••"
-                     class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
+              <label class="block mb-1.5 text-xs font-bold uppercase tracking-wider text-neutral-700">Senha</label>
+              <input id="admin-login-password" name="password" type="password" autocomplete="current-password" v-model="adminAuth.password" required class="admin-login-field">
             </div>
 
-            <!-- Help notice -->
-            <div class="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-lg p-3">
-              <p class="font-bold flex items-center gap-1.5 mb-1">
-                <i class="fa-solid fa-circle-info text-amber-600"></i> Credenciais Padrão (Seed):
-              </p>
-              <p><strong>E-mail:</strong> superadmin@forno-e-massa.pedeai.test</p>
-              <p><strong>Senha:</strong> admin123</p>
-            </div>
-
-            <button type="submit" :disabled="loading.login"
-                    class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2">
-              <span v-if="loading.login"><i class="fa-solid fa-spinner animate-spin"></i> Acessando...</span>
-              <span v-else><i class="fa-solid fa-right-to-bracket"></i> Acessar Painel</span>
+            <button type="submit" :disabled="loading.login" class="admin-login-submit">
+              <span v-if="loading.login"><i class="lni lni-spinner-3 animate-spin"></i> Acessando...</span>
+              <span v-else>Entrar no pedeAi <i class="lni lni-arrow-right" aria-hidden="true"></i></span>
             </button>
           </form>
+            <p class="mt-6 text-center text-sm text-neutral-600">Ainda não tem cadastro? <a href="#" class="font-bold text-neutral-900 underline underline-offset-4 decoration-neutral-300 hover:text-orange-600" @click.prevent>Cadastre seu restaurante</a></p>
+          </div>
+          <footer class="admin-login-legal">Ao prosseguir, você concorda com nossos <a href="#">Termos de Serviço</a> e <a href="#">Política de Privacidade</a>.</footer>
+        </section>
+        <aside class="admin-login-visual" data-purpose="admin-login-visual">
+          <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1100&q=85" alt="Pizza artesanal recém preparada" loading="lazy">
+        </aside>
         </div>
       </div>
 
@@ -133,166 +171,200 @@
       <div v-else class="flex-grow flex flex-col md:flex-row md:min-h-screen">
         
         <!-- Sidebar Navigation -->
-        <aside class="w-full md:w-[170px] md:min-w-[170px] bg-[#fbfcfd] border-r border-gray-200 flex-shrink-0 flex flex-col md:h-screen md:sticky md:top-0 z-20">
+        <aside class="w-full md:w-56 md:min-w-56 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col md:h-screen md:sticky md:top-0 z-20">
           <!-- Brand -->
-          <div class="h-[69px] px-6 flex items-center border-b border-gray-200 bg-white">
-            <a href="/" class="flex items-center gap-2 text-[#b62b00]" aria-label="pedeAI">
-              <i class="fa-solid fa-utensils text-[17px]"></i>
-              <span class="text-[15px] font-black tracking-tight">pedeAI</span>
+          <div class="h-[69px] px-5 flex items-center border-b border-gray-100 bg-white">
+            <a href="/" class="flex items-center gap-2.5 text-primary-600" aria-label="pedeAI">
+              <i class="lni lni-hat-chef-3 text-lg"></i>
+              <span class="text-base font-black tracking-tight text-gray-900">pede<span class="text-primary-600">AI</span></span>
             </a>
           </div>
 
           <!-- User status header -->
-          <div class="h-[48px] px-3 border-b border-gray-200 bg-white flex items-center gap-2">
-            <div class="w-7 h-7 shrink-0 rounded-full bg-[#e7e8f5] text-[#d43b12] flex items-center justify-center text-[10px] font-bold">
+          <div class="px-4 py-3 border-b border-gray-100 bg-white flex items-center gap-3">
+            <div class="w-9 h-9 shrink-0 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">
               {{ adminAuth.user?.name ? adminAuth.user.name.substring(0, 2).toUpperCase() : 'SU' }}
             </div>
             <div class="min-w-0 flex-grow leading-tight">
-              <h4 class="text-[10px] font-bold text-gray-900 truncate">
+              <h4 class="text-xs font-bold text-gray-900 truncate">
                 {{ adminAuth.user?.role === 'superAdmin' ? 'SuperAdmin' : (adminAuth.user?.name || 'Administrador') }}
               </h4>
-              <p class="text-[8px] text-gray-700 truncate">Painel Gerencial</p>
+              <p class="text-[10px] text-gray-500 truncate">{{ adminAuth.user?.role === 'superAdmin' ? 'Super Admin' : (adminAuth.user?.role === 'admin' ? 'Administrador' : 'Funcionário') }}</p>
             </div>
-            <button @click="logout" class="text-gray-400 hover:text-red-600 p-1 rounded" title="Encerrar sessão" aria-label="Encerrar sessão">
-              <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+            <button @click="logout" class="text-gray-400 hover:text-red-500 p-1 rounded transition-colors" title="Encerrar sessão" aria-label="Encerrar sessão">
+              <i class="lni lni-exit text-xs"></i>
             </button>
           </div>
 
           <!-- Nav Items -->
-          <nav class="flex-grow px-1.5 py-3 space-y-1 bg-[#fbfcfd]">
-            <button @click="adminActiveSubTab = 'dashboard'" class="w-full flex items-center gap-3 px-3 py-3 text-[10px] font-medium rounded-md transition-all" :class="adminActiveSubTab === 'dashboard' ? 'bg-[#dc3600] text-white shadow-sm' : 'text-[#4a241d] hover:bg-gray-100'">
-              <i class="fa-solid fa-table-cells-large w-4 text-center text-[13px]"></i>
+          <nav class="flex-grow px-2 py-3 bg-white overflow-y-auto">
+            <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400 px-3 pt-2 pb-1">Menu Principal</p>
+
+            <button @click="adminActiveSubTab = 'dashboard'" class="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-medium rounded-md transition-all"
+                    :class="adminActiveSubTab === 'dashboard' ? 'border-l-4 border-primary-500 bg-primary-50 text-primary-700 font-semibold pl-2' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+              <i class="lni lni-board-writing-3 w-4 text-center text-sm flex-shrink-0"></i>
               <span>Painel</span>
             </button>
 
             <button @click="adminActiveSubTab = 'orders'; fetchAdminOrders();"
-                    class="w-full flex items-center gap-3 px-3 py-3 text-[10px] font-semibold rounded-md transition-all"
-                    :class="adminActiveSubTab === 'orders' ? 'bg-[#dc3600] text-white shadow-sm' : 'text-[#4a241d] hover:bg-gray-100'">
-              <i class="fa-solid fa-rectangle-list w-4 text-center text-[13px]"></i>
+                    class="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-medium rounded-md transition-all"
+                    :class="adminActiveSubTab === 'orders' ? 'border-l-4 border-primary-500 bg-primary-50 text-primary-700 font-semibold pl-2' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+              <i class="lni lni-agenda w-4 text-center text-sm flex-shrink-0"></i>
               <span>Pedidos</span>
               <span v-if="pendingOrdersCount > 0"
-                    class="ml-auto min-w-4 h-4 px-1 flex items-center justify-center rounded-full text-[8px] font-bold"
-                    :class="adminActiveSubTab === 'orders' ? 'bg-[#b60e1a] text-white' : 'bg-red-100 text-red-700'">
+                    class="ml-auto min-w-5 h-5 px-1.5 flex items-center justify-center rounded-full text-[9px] font-bold"
+                    :class="adminActiveSubTab === 'orders' ? 'bg-primary-600 text-white' : 'bg-red-100 text-red-700'">
                 {{ pendingOrdersCount }}
               </span>
             </button>
 
             <button @click="adminActiveSubTab = 'products'"
-                    class="w-full flex items-center gap-3 px-3 py-3 text-[10px] font-medium rounded-md transition-all"
-                    :class="adminActiveSubTab === 'products' ? 'bg-[#dc3600] text-white shadow-sm' : 'text-[#4a241d] hover:bg-gray-100'">
-              <i class="fa-solid fa-bell-concierge w-4 text-center text-[13px]"></i>
+                    class="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-medium rounded-md transition-all"
+                    :class="adminActiveSubTab === 'products' ? 'border-l-4 border-primary-500 bg-primary-50 text-primary-700 font-semibold pl-2' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+              <i class="lni lni-bell-1 w-4 text-center text-sm flex-shrink-0"></i>
               <span>Produtos</span>
             </button>
 
+            <button @click="adminActiveSubTab = 'categories'"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-medium rounded-md transition-all"
+                    :class="adminActiveSubTab === 'categories' ? 'border-l-4 border-primary-500 bg-primary-50 text-primary-700 font-semibold pl-2' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+              <i class="lni lni-dashboard-square-1 w-4 text-center text-sm flex-shrink-0"></i>
+              <span>Categorias</span>
+            </button>
+
+            <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400 px-3 pt-4 pb-1">Administração</p>
+
             <button @click="openUsers" v-if="adminAuth.user?.role === 'admin' || adminAuth.user?.role === 'superAdmin'"
-                    class="w-full flex items-center gap-3 px-3 py-3 text-[10px] font-medium rounded-md transition-all"
-                    :class="adminActiveSubTab === 'users' ? 'bg-[#dc3600] text-white shadow-sm' : 'text-[#4a241d] hover:bg-gray-100'">
-              <i class="fa-solid fa-users w-4 text-center text-[13px]"></i>
+                    class="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-medium rounded-md transition-all"
+                    :class="adminActiveSubTab === 'users' ? 'border-l-4 border-primary-500 bg-primary-50 text-primary-700 font-semibold pl-2' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+              <i class="lni lni-user-multiple-4 w-4 text-center text-sm flex-shrink-0"></i>
               <span>Usuários</span>
             </button>
 
             <button @click="openRestaurantSettings"
-                    class="w-full flex items-center gap-3 px-3 py-3 text-[10px] font-medium rounded-md transition-all"
-                    :class="adminActiveSubTab === 'settings' ? 'bg-[#dc3600] text-white shadow-sm' : 'text-[#4a241d] hover:bg-gray-100'">
-              <i class="fa-solid fa-gear w-4 text-center text-[13px]"></i>
+                    class="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-medium rounded-md transition-all"
+                    :class="adminActiveSubTab === 'settings' ? 'border-l-4 border-primary-500 bg-primary-50 text-primary-700 font-semibold pl-2' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
+              <i class="lni lni-gear-1 w-4 text-center text-sm flex-shrink-0"></i>
               <span>Configurações</span>
-            </button>
-            <button @click="adminActiveSubTab = 'categories'"
-                    class="w-full flex items-center gap-3 px-3 py-3 text-[10px] font-medium rounded-md transition-all"
-                    :class="adminActiveSubTab === 'categories' ? 'bg-[#dc3600] text-white shadow-sm' : 'text-[#4a241d] hover:bg-gray-100'">
-              <i class="fa-solid fa-shapes w-4 text-center text-[13px]"></i>
-              <span>Categorias</span>
             </button>
           </nav>
 
           <!-- Autorefresh status indicator -->
-          <div class="h-9 border-t border-gray-200 bg-white flex items-center justify-center">
-            <span class="flex items-center gap-1 text-[8px] font-medium text-gray-600">
+          <div class="h-9 border-t border-gray-100 bg-gray-50 flex items-center justify-center">
+            <span class="flex items-center gap-1.5 text-[9px] font-medium text-gray-500">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              Ativo (10s)
+              Atualização automática (10s)
             </span>
           </div>
         </aside>
         <!-- Admin Workspace Dashboard Content -->
-        <div class="flex-grow p-6 overflow-y-auto">
+        <div class="flex-grow flex flex-col min-w-0">
+          <!-- Top Header Bar -->
+          <div class="h-[60px] bg-white border-b border-gray-200 flex items-center px-6 gap-4 sticky top-0 z-10">
+            <div class="flex-grow">
+              <h2 class="text-sm font-bold text-gray-900">
+                <span v-if="adminActiveSubTab === 'dashboard'">Painel Gerencial</span>
+                <span v-else-if="adminActiveSubTab === 'orders'">Gerenciador de Pedidos</span>
+                <span v-else-if="adminActiveSubTab === 'products'">Produtos</span>
+                <span v-else-if="adminActiveSubTab === 'categories'">Categorias</span>
+                <span v-else-if="adminActiveSubTab === 'users'">Usuários</span>
+                <span v-else-if="adminActiveSubTab === 'settings'">Configurações do Restaurante</span>
+              </h2>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 text-[10px] text-gray-500">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span class="hidden sm:inline">Auto-refresh ativo</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">
+                  {{ adminAuth.user?.name ? adminAuth.user.name.substring(0, 2).toUpperCase() : 'SU' }}
+                </div>
+                <span class="hidden md:block text-xs font-semibold text-gray-700">{{ adminAuth.user?.name || 'Admin' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Area -->
+          <div class="flex-grow p-6 overflow-y-auto bg-gray-50">
           
           <!-- ============================================== -->
           <!-- ORDERS SUBTAB                                  -->
           <!-- ============================================== -->
-          <div v-if="adminActiveSubTab === 'dashboard'" class="max-w-7xl mx-auto space-y-5">
+          <div v-if="adminActiveSubTab === 'dashboard'" class="ui-panel max-w-7xl mx-auto space-y-5">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 class="text-3xl font-black tracking-tight text-gray-950">Painel Gerencial</h1>
-                <p class="text-xs text-[#60362c] mt-1.5"><i class="fa-regular fa-calendar mr-2"></i>{{ dashboardDate }}</p>
+                <p class="text-xs text-gray-500 mt-1.5"><i class="lni lni-calendar-days mr-2"></i>{{ dashboardDate }}</p>
               </div>
-              <button @click="downloadDashboardReport" class="self-start bg-[#b72e00] hover:bg-[#972600] text-white px-5 py-3 rounded-lg text-xs font-bold shadow-sm">
-                <i class="fa-solid fa-download mr-2"></i>Baixar Relatório
+              <button @click="downloadDashboardReport" class="self-start bg-primary-600 hover:bg-primary-700 text-white px-5 py-3 rounded-lg text-xs font-bold shadow-sm transition-colors">
+                <i class="lni lni-download-1 mr-2"></i>Baixar Relatório
               </button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <article v-for="card in dashboardCards" :key="card.label" class="relative overflow-hidden bg-white border border-[#f0d9d2] rounded-xl p-5 shadow-sm min-h-28">
-                <p class="text-[10px] font-bold tracking-wide text-[#6f2c1b]">{{ card.label }}</p>
-                <p class="text-2xl font-black mt-3 text-gray-950">{{ card.value }}</p>
-                <p class="text-[10px] text-[#b44a00] mt-2"><i :class="card.trendIcon" class="mr-1"></i>{{ card.caption }}</p>
-                <i :class="card.icon" class="absolute right-4 top-5 text-4xl text-[#f3e6e2]"></i>
+              <article v-for="card in dashboardCards" :key="card.label" class="relative overflow-hidden bg-white border border-gray-100 border-l-4 border-l-primary-400 rounded-xl p-5 shadow-sm min-h-28">
+                <p class="text-[10px] font-bold tracking-wider uppercase text-gray-500">{{ card.label }}</p>
+                <p class="text-2xl font-black mt-2 text-gray-950">{{ card.value }}</p>
+                <p class="text-[10px] text-gray-500 mt-1"><i :class="card.trendIcon" class="mr-1 text-primary-500"></i>{{ card.caption }}</p>
+                <i :class="card.icon" class="absolute right-4 top-5 text-5xl text-primary-100"></i>
               </article>
             </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-3">
               <div class="xl:col-span-2 space-y-3">
-                <section class="bg-white border border-[#f0d9d2] rounded-xl p-5 shadow-sm">
+                <section class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                   <div class="flex justify-between items-center mb-5"><h2 class="font-bold text-sm">Vendas por Hora</h2><span class="bg-gray-50 rounded-md px-3 py-2 text-[10px]">Hoje</span></div>
                   <div class="h-52 flex items-end gap-3 border-b border-gray-200 px-1">
                     <div v-for="sale in dashboardHourlySales" :key="sale.hour" class="flex-1 h-full flex flex-col justify-end items-center gap-2">
-                      <div class="w-full max-w-14 rounded-t-sm" :class="sale.isPeak ? 'bg-[#b92f00]' : 'bg-[#ffad98]'"
+                      <div class="w-full max-w-14 rounded-t-sm" :class="sale.isPeak ? 'bg-primary-600' : 'bg-primary-200'"
                            :style="{ height: sale.height + '%' }" :title="'R$ ' + formatMoney(sale.total)"></div>
-                      <span class="text-[9px]" :class="sale.isPeak ? 'text-[#b92f00] font-bold' : 'text-gray-600'">{{ sale.label }}</span>
+                      <span class="text-[9px]" :class="sale.isPeak ? 'text-primary-700 font-bold' : 'text-gray-600'">{{ sale.label }}</span>
                     </div>
                   </div>
                 </section>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <article class="bg-[#fff5f4] border border-red-200 rounded-xl p-4">
-                    <p class="text-[10px] font-bold"><i class="fa-regular fa-circle-xmark text-red-600 mr-2"></i>Cancelados</p>
+                  <article class="bg-red-50 border border-red-100 rounded-xl p-4">
+                    <p class="text-[10px] font-bold"><i class="lni lni-xmark-circle text-red-500 mr-2"></i>Cancelados</p>
                     <p class="font-black text-base mt-3">{{ dashboardMetrics.cancelled }} Pedidos</p>
-                    <p class="text-[10px] text-gray-600 mt-1">R$ {{ formatMoney(dashboardMetrics.cancelledValue) }} perdidos</p>
+                    <p class="text-[10px] text-gray-500 mt-1">R$ {{ formatMoney(dashboardMetrics.cancelledValue) }} perdidos</p>
                   </article>
-                  <article class="bg-white border border-[#f0d9d2] rounded-xl p-4">
-                    <p class="text-[10px] font-bold"><i class="fa-regular fa-star text-amber-600 mr-2"></i>Mais Vendido</p>
+                  <article class="bg-white border border-gray-100 rounded-xl p-4">
+                    <p class="text-[10px] font-bold"><i class="lni lni-star-fat text-primary-500 mr-2"></i>Mais Vendido</p>
                     <div class="flex items-center gap-2 mt-3">
                       <img v-if="dashboardBestSeller.image" :src="dashboardBestSeller.image" alt="" class="w-9 h-9 rounded-md object-cover">
-                      <div v-else class="w-9 h-9 rounded-md bg-amber-100 flex items-center justify-center"><i class="fa-solid fa-burger text-amber-700"></i></div>
-                      <div class="min-w-0"><p class="text-xs font-bold truncate">{{ dashboardBestSeller.name }}</p><p class="text-[10px] text-[#b44a00]">{{ dashboardBestSeller.quantity }} vendidos</p></div>
+                      <div v-else class="w-9 h-9 rounded-md bg-primary-100 flex items-center justify-center"><i class="lni lni-burger-1 text-primary-600"></i></div>
+                      <div class="min-w-0"><p class="text-xs font-bold truncate">{{ dashboardBestSeller.name }}</p><p class="text-[10px] text-primary-700">{{ dashboardBestSeller.quantity }} vendidos</p></div>
                     </div>
                   </article>
-                  <article class="bg-white border border-[#f0d9d2] rounded-xl p-4">
-                    <p class="text-[10px] font-bold"><i class="fa-solid fa-motorcycle text-[#b72e00] mr-2"></i>Tempo Médio</p>
+                  <article class="bg-white border border-gray-100 rounded-xl p-4">
+                    <p class="text-[10px] font-bold"><i class="lni lni-bike text-primary-600 mr-2"></i>Tempo Médio</p>
                     <p class="font-black text-base mt-3">{{ dashboardMetrics.averageMinutes }} min</p>
-                    <p class="text-[10px] text-[#b44a00] mt-1">Pedidos concluídos hoje</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Pedidos concluídos hoje</p>
                   </article>
                 </div>
               </div>
 
-              <aside class="bg-white border border-[#f0d9d2] rounded-xl p-5 shadow-sm">
+              <aside class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
                 <div class="flex items-start justify-between mb-4">
                   <h2 class="font-bold text-sm leading-tight">Alertas &<br>Atividades</h2>
-                  <button @click="adminActiveSubTab = 'orders'" class="text-[10px] font-bold text-[#b72e00]">Ver tudo</button>
+                  <button @click="adminActiveSubTab = 'orders'" class="text-[10px] font-bold text-primary-600 hover:text-primary-800">Ver tudo</button>
                 </div>
                 <div v-if="dashboardAlerts.length" class="space-y-3">
                   <article v-for="alert in dashboardAlerts" :key="alert.key" class="rounded-lg border p-3 flex gap-3" :class="alert.boxClass">
                     <i :class="alert.icon" class="mt-0.5"></i>
-                    <div><p class="text-[10px] font-bold leading-tight">{{ alert.title }}</p><p class="text-[10px] text-[#653b32] mt-1 leading-snug">{{ alert.description }}</p><p class="text-[9px] text-gray-500 mt-2">{{ alert.time }}</p></div>
+                    <div><p class="text-[10px] font-bold leading-tight">{{ alert.title }}</p><p class="text-[10px] text-gray-600 mt-1 leading-snug">{{ alert.description }}</p><p class="text-[9px] text-gray-500 mt-2">{{ alert.time }}</p></div>
                   </article>
                 </div>
-                <div v-else class="py-12 text-center text-gray-400"><i class="fa-regular fa-circle-check text-3xl text-emerald-500"></i><p class="text-xs mt-3">Nenhum alerta no momento.</p></div>
+                <div v-else class="py-12 text-center text-gray-400"><i class="lni lni-check-circle-1 text-3xl text-emerald-500"></i><p class="text-xs mt-3">Nenhum alerta no momento.</p></div>
               </aside>
             </div>
           </div>
 
           <!-- ============================================== -->
           <!-- ORDERS SUBTAB                                  -->
-          <!-- ============================================== -->          <div v-if="adminActiveSubTab === 'orders'" class="space-y-5">
+          <!-- ============================================== -->          <div v-if="adminActiveSubTab === 'orders'" class="ui-panel space-y-5">
             <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
               <div>
                 <h1 class="text-2xl font-black text-gray-900">Gerenciador de Pedidos</h1>
@@ -301,26 +373,26 @@
               <div class="flex flex-col sm:flex-row gap-2 w-full xl:w-auto">
                 <label class="relative flex-1 sm:w-72">
                   <span class="sr-only">Buscar pedido por ID</span>
-                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <i class="lni lni-search-1 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                   <input v-model.trim="orderSearchTerm" type="search" inputmode="numeric" placeholder="Buscar pedido por ID, ex: #1024"
                          class="w-full pl-10 pr-9 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500">
                   <button v-if="orderSearchTerm" @click="orderSearchTerm = ''" type="button"
-                          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" aria-label="Limpar busca"><i class="fa-solid fa-xmark"></i></button>
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" aria-label="Limpar busca"><i class="lni lni-xmark"></i></button>
                 </label>
                 <button @click="fetchAdminOrders" :disabled="loading.orders"
                         class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 flex items-center justify-center gap-2 shadow-sm disabled:opacity-60">
-                  <i class="fa-solid fa-arrows-rotate" :class="{'animate-spin': loading.orders}"></i>Atualizar
+                  <i class="lni lni-refresh-circle-1-clockwise" :class="{'animate-spin': loading.orders}"></i>Atualizar
                 </button>
               </div>
             </div>
 
             <div v-if="orderSearchTerm && searchedAdminOrders.length === 0 && !loading.orders" class="text-center py-12 bg-white border rounded-xl">
-              <i class="fa-solid fa-magnifying-glass text-gray-300 text-4xl mb-3"></i>
+              <i class="lni lni-search-1 text-gray-300 text-4xl mb-3"></i>
               <h3 class="text-lg font-bold">Pedido não encontrado</h3>
-              <p class="text-gray-500 text-sm">Não há pedido com ID correspondente a “{{ orderSearchTerm }}”.</p>
+              <p class="text-gray-500 text-sm">Não há pedido com ID correspondente a &ldquo;{{ orderSearchTerm }}&rdquo;.</p>
             </div>
             <div v-else-if="adminOrders.length === 0 && !loading.orders" class="text-center py-16 bg-white border rounded-xl">
-              <i class="fa-solid fa-clipboard-list text-gray-300 text-5xl mb-3"></i>
+              <i class="lni lni-clipboard text-gray-300 text-5xl mb-3"></i>
               <h3 class="text-lg font-bold">Nenhum pedido encontrado</h3>
               <p class="text-gray-500 text-sm">Os novos pedidos aparecerão aqui automaticamente.</p>
             </div>
@@ -344,41 +416,55 @@
                     </div>
                     <div class="flex flex-wrap gap-1.5 text-[11px] text-gray-600 mb-3">
                       <span class="bg-gray-50 border px-2 py-1 rounded">
-                        <i :class="ord.order_type === 'delivery' ? 'fa-solid fa-motorcycle' : 'fa-solid fa-chair'"></i>
+                        <i :class="ord.order_type === 'delivery' ? 'lni lni-bike' : 'lni lni-home-2'"></i>
                         {{ ord.order_type === 'delivery' ? 'Delivery' : (ord.table_label || 'Mesa ' + ord.table_number) }}
                       </span>
                       <span class="bg-gray-50 border px-2 py-1 rounded uppercase">{{ getPaymentLabel(ord.payment_method) }}</span>
                     </div>
                     <div class="bg-gray-50 rounded-md p-2.5 mb-3 max-h-28 overflow-y-auto">
                       <div v-for="item in ord.order_items" :key="item.id" class="flex justify-between gap-2 text-xs py-0.5">
-                        <span class="truncate"><strong>{{ item.quantity }}x</strong> {{ item.product?.name || 'Item' }}</span>
+                        <span class="truncate"><strong>{{ item.quantity }}x</strong> {{ item.product?.name || 'Item' }}<small v-if="item.addons?.length" class="block text-gray-500">+ {{ item.addons.map(addon => addon.name).join(', ') }}</small></span>
                         <span class="whitespace-nowrap">R$ {{ formatMoney(item.unit_price * item.quantity) }}</span>
                       </div>
                     </div>
                     <div class="flex justify-between items-center mb-3"><span class="text-xs text-gray-500">{{ ord.customer_phone }}</span><strong class="text-primary-700">R$ {{ formatMoney(ord.total) }}</strong></div>
-                    <div v-if="ord.delivery_address" class="text-xs text-gray-500 border-t pt-2 mb-3 line-clamp-2"><i class="fa-solid fa-location-dot mr-1"></i>{{ ord.delivery_address }}</div>
+                    <div v-if="ord.delivery_address" class="text-xs text-gray-500 border-t pt-2 mb-3 line-clamp-2"><i class="lni lni-location-arrow-right mr-1"></i>{{ ord.delivery_address }}</div>
                     <div v-if="!isTerminalOrder(ord)" class="flex gap-2">
                       <button @click="advanceOrder(ord)" :disabled="loading.updateOrderId === ord.id"
                               class="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs py-2 rounded-md disabled:opacity-60">
-                        <i v-if="loading.updateOrderId === ord.id" class="fa-solid fa-spinner animate-spin mr-1"></i>{{ nextOrderActionLabel(ord.status) }}
+                        <i v-if="loading.updateOrderId === ord.id" class="lni lni-spinner-3 animate-spin mr-1"></i>{{ nextOrderActionLabel(ord.status) }}
                       </button>
                       <button @click="updateOrderStatus(ord.id, 'cancelled')" :disabled="loading.updateOrderId === ord.id"
-                              class="px-3 border border-red-200 text-red-600 hover:bg-red-50 rounded-md" title="Cancelar pedido"><i class="fa-solid fa-xmark"></i></button>
+                              class="px-3 border border-red-200 text-red-600 hover:bg-red-50 rounded-md" title="Cancelar pedido"><i class="lni lni-xmark"></i></button>
                     </div>
                   </article>
                 </div>
               </section>
             </div>
-            <p v-if="adminOrders.length > 0" class="text-xs text-gray-400"><i class="fa-solid fa-grip mr-2"></i>Arraste um pedido para outra coluna ou use o botão para avançar.</p>
+            <p v-if="adminOrders.length > 0" class="text-xs text-gray-400"><i class="lni lni-menu-meatballs-1 mr-2"></i>Arraste um pedido para outra coluna ou use o botão para avançar.</p>
           </div>
 
           <!-- ============================================== -->          <!-- PRODUCTS SUBTAB                                -->
           <!-- ============================================== -->
-          <div v-if="adminActiveSubTab === 'products'" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div v-if="adminActiveSubTab === 'products'" class="ui-panel grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <form v-if="canImportMenu" @submit.prevent="importMenu" class="lg:col-span-12 rounded-xl border border-primary-200 bg-primary-50 p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 class="text-sm font-bold text-gray-900">Importar cardápio JSON</h2>
+                <p class="text-xs text-gray-600">As imagens não são importadas: adicione-as depois ao editar cada produto.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <a :href="menuImportTemplateUrl" class="rounded-lg border border-primary-500 px-3 py-2 text-xs font-bold text-primary-700 hover:bg-white">Baixar modelo</a>
+                <input type="file" accept="application/json,.json" required class="max-w-52 text-xs" @change="menuImportFile = $event.target.files?.[0] || null">
+                <button type="submit" :disabled="loading.menuImport || !menuImportFile" class="rounded-lg bg-primary-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">
+                  <span v-if="loading.menuImport"><i class="lni lni-spinner-3 animate-spin"></i> Importando...</span>
+                  <span v-else>Importar</span>
+                </button>
+              </div>
+            </form>
             
-            <!-- Create Product Form (POST /api/v1/products) -->
+            <!-- Create Product Form (scoped products endpoint) -->
             <div class="lg:col-span-4 bg-white border rounded-xl p-5 self-start shadow-sm">
-              <h2 class="text-lg font-bold text-gray-900 mb-4"><i class="fa-solid fa-plus-circle text-primary-500"></i> Novo Produto</h2>
+              <h2 class="text-lg font-bold text-gray-900 mb-4"><i class="lni lni-plus-circle text-primary-500"></i> Novo Produto</h2>
               <form @submit.prevent="createProduct" class="space-y-4">
                 <div>
                   <label class="block text-xs font-semibold text-gray-700 mb-1">Categoria *</label>
@@ -416,12 +502,26 @@
                   <label class="block text-xs font-semibold text-gray-700 mb-1">URL da Imagem (Opcional)</label>
                   <input type="url" v-model="newProductForm.image_url" placeholder="https://exemplo.com/foto.jpg"
                          class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
+                  <label class="block mt-2 text-xs font-semibold text-gray-700">Ou enviar imagem
+                    <input type="file" accept="image/png,image/jpeg,image/webp" class="block w-full mt-1 text-xs" @change="newProductForm.image_file = $event.target.files?.[0] || null">
+                  </label>
+                  <p class="text-[9px] text-gray-400 mt-1">PNG, JPG ou WebP. Máximo de 2 MB.</p>
                 </div>
+                <div class="space-y-2 border-t pt-3">
+                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-gray-700">Adicionais</span><button type="button" @click="addAddon(newProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div>
+                  <div v-for="(addon, index) in newProductForm.addons" :key="index" class="grid grid-cols-[1fr_90px_auto_auto] gap-2 items-center">
+                    <input v-model.trim="addon.name" required placeholder="Ex.: Queijo extra" class="rounded border-gray-300 text-xs">
+                    <input v-model.number="addon.price" required min="0.01" step="0.01" type="number" placeholder="R$" class="rounded border-gray-300 text-xs">
+                    <label class="text-xs"><input v-model="addon.available" type="checkbox"> Ativo</label>
+                    <button type="button" @click="removeAddon(newProductForm, index)" class="text-red-600 text-xs" aria-label="Remover adicional">Remover</button>
+                  </div>
+                </div>
+                <div class="space-y-2 border-t pt-3"><div class="flex justify-between items-center"><span class="text-xs font-semibold text-gray-700">Tamanhos / variações</span><button type="button" @click="addVariant(newProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div><div v-for="(variant, index) in newProductForm.variants" :key="index" class="grid grid-cols-[1fr_80px_55px_auto] gap-2 items-center"><input v-model.trim="variant.name" required placeholder="Ex.: Média" class="rounded border-gray-300 text-xs"><input v-model.number="variant.price" required min="0.01" step="0.01" type="number" placeholder="R$" class="rounded border-gray-300 text-xs"><label class="text-xs"><input v-model="variant.available" type="checkbox"> Ativo</label><button type="button" @click="removeVariant(newProductForm, index)" class="text-red-600 text-xs">Remover</button></div></div>
 
                 <button type="submit" :disabled="loading.newProduct"
                         class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-all shadow-md flex items-center justify-center gap-2">
-                  <span v-if="loading.newProduct"><i class="fa-solid fa-spinner animate-spin"></i> Salvando...</span>
-                  <span v-else><i class="fa-solid fa-save"></i> Salvar Produto</span>
+                  <span v-if="loading.newProduct"><i class="lni lni-spinner-3 animate-spin"></i> Salvando...</span>
+                  <span v-else><i class="lni lni-floppy-disk-1"></i> Salvar Produto</span>
                 </button>
               </form>
             </div>
@@ -462,11 +562,11 @@
                         </span>
                       </td>
                       <td class="p-3 text-right pr-5">
-                        <button @click="openEditProduct(prod)" class="text-gray-400 hover:text-primary-600 p-1" title="Editar Produto">
-                          <i class="fa-regular fa-pen-to-square"></i>
+                        <button type="button" @click="openEditProduct(prod)" class="text-gray-400 hover:text-primary-600 p-1" title="Editar Produto">
+                          <i class="lni lni-pen-to-square"></i>
                         </button>
-                        <button @click="deleteProduct(prod.id)" class="text-gray-400 hover:text-red-600 p-1" title="Excluir Produto">
-                          <i class="fa-regular fa-trash-can"></i>
+                        <button type="button" @click="deleteProduct(prod.id)" class="text-gray-400 hover:text-red-600 p-1" title="Excluir Produto">
+                          <i class="lni lni-trash-3"></i>
                         </button>
                       </td>
                     </tr>
@@ -488,6 +588,19 @@
                 <textarea v-model="editProductForm.description" placeholder="Descrição" class="rounded-lg border-gray-300"></textarea>
                 <input v-model.number="editProductForm.price" required type="number" min="0.01" step="0.01" placeholder="Preço" class="rounded-lg border-gray-300">
                 <input v-model="editProductForm.image_url" type="url" placeholder="URL da imagem" class="rounded-lg border-gray-300">
+                <label class="text-xs font-semibold">Ou enviar imagem
+                  <input type="file" accept="image/png,image/jpeg,image/webp" class="block w-full mt-1 text-xs" @change="editProductForm.image_file = $event.target.files?.[0] || null">
+                </label>
+                <div class="col-span-full space-y-2 border-t pt-3">
+                  <div class="flex justify-between items-center"><span class="text-sm font-semibold">Adicionais</span><button type="button" @click="addAddon(editProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div>
+                  <div v-for="(addon, index) in editProductForm.addons" :key="addon.id || index" class="grid grid-cols-[1fr_90px_auto_auto] gap-2 items-center">
+                    <input v-model.trim="addon.name" required placeholder="Nome" class="rounded border-gray-300 text-xs">
+                    <input v-model.number="addon.price" required min="0.01" step="0.01" type="number" class="rounded border-gray-300 text-xs">
+                    <label class="text-xs"><input v-model="addon.available" type="checkbox"> Ativo</label>
+                    <button type="button" @click="removeAddon(editProductForm, index)" class="text-red-600 text-xs">Remover</button>
+                  </div>
+                </div>
+                <div class="col-span-full space-y-2 border-t pt-3"><div class="flex justify-between items-center"><span class="text-sm font-semibold">Tamanhos / variações</span><button type="button" @click="addVariant(editProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div><div v-for="(variant, index) in editProductForm.variants" :key="variant.id || index" class="grid grid-cols-[1fr_80px_55px_auto] gap-2 items-center"><input v-model.trim="variant.name" required placeholder="Nome" class="rounded border-gray-300 text-xs"><input v-model.number="variant.price" required min="0.01" step="0.01" type="number" class="rounded border-gray-300 text-xs"><label class="text-xs"><input v-model="variant.available" type="checkbox"> Ativo</label><button type="button" @click="removeVariant(editProductForm, index)" class="text-red-600 text-xs">Remover</button></div></div>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" v-model="editProductForm.available"> Produto disponível</label>
               </div>
               <div class="flex justify-end gap-3"><button type="button" @click="closeEditProduct" class="px-4 py-2 text-gray-600">Cancelar</button><button class="bg-primary-600 text-white rounded-lg px-4 py-2">Salvar alterações</button></div>
@@ -506,7 +619,7 @@
 
           <!-- ============================================== -->
           <!-- USERS SUBTAB -->
-          <div v-if="adminActiveSubTab === 'users'" class="space-y-4 max-w-7xl mx-auto">
+          <div v-if="adminActiveSubTab === 'users'" class="ui-panel space-y-4 max-w-7xl mx-auto">
             <div>
               <h1 class="text-2xl font-black text-gray-950">Administradores e funcionários</h1>
               <p class="text-xs text-gray-600 mt-1">Crie usuários e defina permissões para funcionários.</p>
@@ -518,36 +631,36 @@
                   <div class="space-y-1.5">
                     <label for="new-user-name" class="block text-[10px] font-bold uppercase tracking-wide text-gray-600">Nome completo</label>
                     <div class="relative group">
-                      <i class="fa-regular fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs group-focus-within:text-[#d87918]"></i>
+                      <i class="lni lni-user-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs group-focus-within:text-primary-600"></i>
                       <input id="new-user-name" v-model.trim="newUserForm.name" required minlength="2" autocomplete="name" placeholder="Ex.: João Silva"
-                             class="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 transition-all hover:border-gray-400 focus:bg-white focus:border-[#d87918] focus:ring-4 focus:ring-orange-100 focus:outline-none">
+                             class="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 transition-all hover:border-gray-400 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-orange-100 focus:outline-none">
                     </div>
                   </div>
 
                   <div class="space-y-1.5">
                     <label for="new-user-email" class="block text-[10px] font-bold uppercase tracking-wide text-gray-600">E-mail</label>
                     <div class="relative group">
-                      <i class="fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs group-focus-within:text-[#d87918]"></i>
+                      <i class="lni lni-envelope-1 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs group-focus-within:text-primary-600"></i>
                       <input id="new-user-email" v-model.trim="newUserForm.email" required type="email" autocomplete="email" placeholder="usuario@restaurante.com"
-                             class="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 transition-all hover:border-gray-400 focus:bg-white focus:border-[#d87918] focus:ring-4 focus:ring-orange-100 focus:outline-none">
+                             class="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 transition-all hover:border-gray-400 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-orange-100 focus:outline-none">
                     </div>
                   </div>
 
                   <div class="space-y-1.5">
                     <label for="new-user-password" class="block text-[10px] font-bold uppercase tracking-wide text-gray-600">Senha inicial</label>
                     <div class="relative group">
-                      <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs group-focus-within:text-[#d87918]"></i>
+                      <i class="lni lni-locked-1 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs group-focus-within:text-primary-600"></i>
                       <input id="new-user-password" v-model="newUserForm.password" required minlength="6" type="password" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"
-                             class="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 transition-all hover:border-gray-400 focus:bg-white focus:border-[#d87918] focus:ring-4 focus:ring-orange-100 focus:outline-none">
+                             class="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 pl-9 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 transition-all hover:border-gray-400 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-orange-100 focus:outline-none">
                     </div>
                   </div>
 
                   <div class="space-y-1.5">
                     <label for="new-user-role" class="block text-[10px] font-bold uppercase tracking-wide text-gray-600">Cargo</label>
                     <div class="relative group">
-                      <i class="fa-solid fa-user-shield absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs group-focus-within:text-[#d87918] pointer-events-none"></i>
+                      <i class="lni lni-shield-2 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs group-focus-within:text-primary-600 pointer-events-none"></i>
                       <select id="new-user-role" v-model="newUserForm.role"
-                              class="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 pl-9 pr-9 text-sm text-gray-900 shadow-sm transition-all hover:border-gray-400 focus:bg-white focus:border-[#d87918] focus:ring-4 focus:ring-orange-100 focus:outline-none cursor-pointer">
+                              class="w-full h-11 rounded-lg border border-gray-300 bg-gray-50 pl-9 pr-9 text-sm text-gray-900 shadow-sm transition-all hover:border-gray-400 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-orange-100 focus:outline-none cursor-pointer">
                         <option value="funcionario">Funcionário</option>
                         <option v-if="adminAuth.user?.role === 'superAdmin'" value="admin">Administrador</option>
                       </select>
@@ -559,13 +672,13 @@
                     <label v-for="permission in availablePermissions" :key="permission"
                            class="flex items-center gap-2 text-[10px] text-gray-700 cursor-pointer select-none">
                       <input type="checkbox" v-model="newUserForm.permissions[permission]"
-                             class="w-3.5 h-3.5 rounded border-gray-300 text-[#d87918] focus:ring-[#d87918]">
+                             class="w-3.5 h-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-400">
                       {{ permission }}
                     </label>
                   </div>
                   <button :disabled="loading.newUser"
-                          class="xl:w-36 h-9 bg-[#d77c1b] hover:bg-[#bd6812] disabled:opacity-60 text-white rounded-md px-5 text-[10px] font-bold transition-colors">
-                    <i v-if="loading.newUser" class="fa-solid fa-spinner animate-spin mr-1"></i>
+                          class="xl:w-36 h-9 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white rounded-md px-5 text-[10px] font-bold transition-colors">
+                    <i v-if="loading.newUser" class="lni lni-spinner-3 animate-spin mr-1"></i>
                     {{ loading.newUser ? 'Criando...' : 'Criar usuário' }}
                   </button>
                 </div>
@@ -595,16 +708,16 @@
                         </td>
                         <td class="px-4 py-4 text-right whitespace-nowrap">
                           <template v-if="canManageUser(user)">
-                            <button @click="openEditUser(user)" class="text-[#d15d00] hover:text-[#9f3700] mr-3 font-medium">Editar</button>
+                            <button @click="openEditUser(user)" class="text-primary-600 hover:text-[#9f3700] mr-3 font-medium">Editar</button>
                             <button :disabled="loading.deleteUserId === user.id" @click="deleteUser(user.id)"
                                     class="text-red-600 hover:text-red-800 disabled:opacity-60 font-medium">
                               {{ loading.deleteUserId === user.id ? 'Excluindo...' : 'Excluir' }}
                             </button>
                           </template>
-                          <span v-else class="text-gray-300">—</span>
+                          <span v-else class="text-gray-300">&mdash;</span>
                         </td>
                       </tr>
-                      <tr v-if="loading.users"><td colspan="5" class="p-8 text-center text-xs text-gray-500"><i class="fa-solid fa-spinner animate-spin mr-2"></i>Carregando usuários...</td></tr>
+                      <tr v-if="loading.users"><td colspan="5" class="p-8 text-center text-xs text-gray-500"><i class="lni lni-spinner-3 animate-spin mr-2"></i>Carregando usuários...</td></tr>
                       <tr v-else-if="!users.length"><td colspan="5" class="p-8 text-center text-xs text-gray-500">Nenhum usuário cadastrado.</td></tr>
                     </tbody>
                   </table>
@@ -618,7 +731,7 @@
               <form @submit.prevent="updateUser" class="w-full max-w-2xl bg-white rounded-xl shadow-xl overflow-hidden">
                 <div class="px-6 py-4 border-b flex justify-between items-center">
                   <div><h2 class="text-lg font-bold">Editar usuário</h2><p class="text-xs text-gray-500 mt-1">Atualize os dados, cargo e permissões.</p></div>
-                  <button type="button" @click="closeEditUser" class="text-gray-400 hover:text-gray-700" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+                  <button type="button" @click="closeEditUser" class="text-gray-400 hover:text-gray-700" aria-label="Fechar"><i class="lni lni-xmark"></i></button>
                 </div>
                 <div class="p-6 space-y-5">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -634,14 +747,14 @@
                     <p class="text-xs font-bold text-gray-700 mb-3">Permissões</p>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       <label v-for="permission in availablePermissions" :key="permission" class="flex items-center gap-2 text-xs text-gray-700">
-                        <input type="checkbox" v-model="editUserForm.permissions[permission]" class="rounded border-gray-300 text-[#d87918] focus:ring-[#d87918]">{{ permission }}
+                        <input type="checkbox" v-model="editUserForm.permissions[permission]" class="rounded border-gray-300 text-primary-600 focus:ring-primary-400">{{ permission }}
                       </label>
                     </div>
                   </div>
                 </div>
                 <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
                   <button type="button" @click="closeEditUser" class="px-4 py-2 text-xs font-semibold text-gray-600">Cancelar</button>
-                  <button :disabled="loading.updateUser" class="bg-[#d77c1b] hover:bg-[#bd6812] disabled:opacity-60 text-white rounded-md px-5 py-2 text-xs font-bold">
+                  <button :disabled="loading.updateUser" class="bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white rounded-md px-5 py-2 text-xs font-bold">
                     {{ loading.updateUser ? 'Salvando...' : 'Salvar alterações' }}
                   </button>
                 </div>
@@ -651,10 +764,10 @@
           <!-- ============================================== -->
           <!-- RESTAURANT SETTINGS SUBTAB                     -->
           <!-- ============================================== -->
-          <div v-if="adminActiveSubTab === 'settings'" class="max-w-4xl mx-auto space-y-4">
+          <div v-if="adminActiveSubTab === 'settings'" class="ui-panel max-w-4xl mx-auto space-y-4">
             <div>
               <h1 class="text-2xl font-black text-gray-950">Configurações do Restaurante</h1>
-              <p class="text-xs text-[#60362c] mt-1">Gerencie as informações públicas e a identidade visual do seu estabelecimento.</p>
+              <p class="text-xs text-gray-500 mt-1">Gerencie as informações públicas e a identidade visual do seu estabelecimento.</p>
             </div>
 
             <form @submit.prevent="saveRestaurantSettings" class="bg-white border border-gray-300 rounded-xl shadow-sm overflow-hidden">
@@ -663,13 +776,13 @@
                 <p class="text-[10px] text-gray-500 mt-1">Esta imagem aparecerá no topo da página do cardápio.</p>
                 <div class="mt-4 h-52 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center">
                   <img v-if="restaurantSettings.banner_url" :src="restaurantSettings.banner_url" alt="Prévia do banner" class="w-full h-full object-cover">
-                  <div v-else class="text-center text-gray-400"><i class="fa-regular fa-image text-4xl"></i><p class="text-xs mt-2">Nenhum banner selecionado</p></div>
+                  <div v-else class="text-center text-gray-400"><i class="lni lni-gallery text-4xl"></i><p class="text-xs mt-2">Nenhum banner selecionado</p></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 mt-3">
                   <input v-model.trim="restaurantSettings.banner_url" type="url" placeholder="https://exemplo.com/banner.jpg"
-                         class="h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 text-xs focus:border-[#d34000] focus:ring-orange-100">
-                  <label class="h-10 px-4 rounded-lg border border-[#d34000] text-[#b72e00] text-xs font-bold flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-50">
-                    <i class="fa-solid fa-upload"></i>Enviar imagem
+                         class="h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 text-xs focus:border-primary-500 focus:ring-orange-100">
+                  <label class="h-10 px-4 rounded-lg border border-primary-500 text-primary-700 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer hover:bg-orange-50">
+                    <i class="lni lni-upload-1"></i>Enviar imagem
                     <input type="file" accept="image/png,image/jpeg,image/webp" class="sr-only" @change="handleRestaurantImage($event, 'banner_url')">
                   </label>
                 </div>
@@ -680,13 +793,13 @@
                 <div>
                   <label for="restaurant-display-name" class="block text-[9px] font-bold uppercase text-gray-600 mb-1.5">Nome de exibição</label>
                   <input id="restaurant-display-name" v-model.trim="restaurantSettings.name" required minlength="2" maxlength="120"
-                         class="w-full h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 text-xs focus:border-[#d34000] focus:ring-orange-100">
+                         class="w-full h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 text-xs focus:border-primary-500 focus:ring-orange-100">
                 </div>
                 <div>
                   <label for="restaurant-description" class="block text-[9px] font-bold uppercase text-gray-600 mb-1.5">Descrição curta</label>
                   <textarea id="restaurant-description" v-model.trim="restaurantSettings.menu_description" maxlength="500" rows="4"
                             placeholder="Conte aos clientes o que torna seu restaurante especial."
-                            class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-xs focus:border-[#d34000] focus:ring-orange-100"></textarea>
+                            class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-xs focus:border-primary-500 focus:ring-orange-100"></textarea>
                   <p class="text-[9px] text-gray-400 text-right">{{ (restaurantSettings.menu_description || '').length }}/500</p>
                 </div>
               </section>
@@ -699,11 +812,11 @@
                     <div class="flex items-center gap-4">
                       <div class="w-20 h-16 rounded-lg border bg-gray-50 flex items-center justify-center overflow-hidden">
                         <img v-if="restaurantSettings.logo_url" :src="restaurantSettings.logo_url" alt="Logotipo" class="max-w-full max-h-full object-contain">
-                        <i v-else class="fa-regular fa-image text-gray-300 text-2xl"></i>
+                        <i v-else class="lni lni-gallery text-gray-300 text-2xl"></i>
                       </div>
                       <div>
                         <p class="text-[9px] text-gray-500">Recomendado: PNG ou JPG quadrado.</p>
-                        <label class="text-[10px] font-bold text-[#d34000] cursor-pointer hover:underline">
+                        <label class="text-[10px] font-bold text-primary-600 cursor-pointer hover:underline">
                           Fazer upload
                           <input type="file" accept="image/png,image/jpeg,image/webp" class="sr-only" @change="handleRestaurantImage($event, 'logo_url')">
                         </label>
@@ -726,20 +839,43 @@
               </section>
 
               <section class="p-6 border-b border-gray-200">
+                <h2 class="text-sm font-bold">Tipografia do cardápio</h2>
+                <p class="text-[10px] text-gray-500 mt-1">Selecione a fonte principal para títulos e textos do seu cardápio público.</p>
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div v-for="font in supportedFonts" :key="font.id"
+                       @click="restaurantSettings.font_family = font.id"
+                       :class="[
+                         'p-3 rounded-lg border-2 cursor-pointer transition-all flex flex-col justify-between h-24 bg-white',
+                         restaurantSettings.font_family === font.id ? 'border-primary-600 shadow-sm bg-orange-50/20' : 'border-gray-200 hover:border-gray-300'
+                       ]">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-gray-800">{{ font.name }}</span>
+                      <i v-if="restaurantSettings.font_family === font.id" class="lni lni-check-circle-1 text-primary-700 text-sm"></i>
+                      <span v-else class="w-3.5 h-3.5 rounded-full border border-gray-300"></span>
+                    </div>
+                    <div>
+                      <p :style="{ fontFamily: font.css }" class="text-base text-gray-900 leading-tight">Cardápio & Sabor</p>
+                      <span class="text-[9px] text-gray-400 uppercase tracking-wider">{{ font.category }}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="p-6 border-b border-gray-200">
                 <h2 class="text-sm font-bold">Imagem padrão dos produtos</h2>
                 <p class="text-[10px] text-gray-500 mt-1">Usada no cardápio quando um produto não possui imagem própria.</p>
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-[180px_1fr] gap-5 items-center">
                   <div class="h-32 rounded-lg border border-gray-200 bg-gray-100 overflow-hidden flex items-center justify-center">
                     <img v-if="restaurantSettings.product_placeholder_url" :src="restaurantSettings.product_placeholder_url"
                          alt="Prévia da imagem padrão dos produtos" class="w-full h-full object-cover">
-                    <div v-else class="text-center text-gray-400"><i class="fa-solid fa-burger text-3xl"></i><p class="text-[10px] mt-2">Sem imagem padrão</p></div>
+                    <div v-else class="text-center text-gray-400"><i class="lni lni-burger-1 text-3xl"></i><p class="text-[10px] mt-2">Sem imagem padrão</p></div>
                   </div>
                   <div class="space-y-3">
                     <input v-model.trim="restaurantSettings.product_placeholder_url" type="url" placeholder="https://exemplo.com/produto-placeholder.jpg"
-                           class="w-full h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 text-xs focus:border-[#d34000] focus:ring-orange-100">
+                           class="w-full h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 text-xs focus:border-primary-500 focus:ring-orange-100">
                     <div class="flex flex-wrap gap-2">
-                      <label class="h-9 px-4 rounded-lg bg-[#b72e00] hover:bg-[#972600] text-white text-xs font-bold flex items-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-upload"></i>Fazer upload
+                      <label class="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer">
+                        <i class="lni lni-upload-1"></i>Fazer upload
                         <input type="file" accept="image/png,image/jpeg,image/webp" class="sr-only" @change="handleRestaurantImage($event, 'product_placeholder_url')">
                       </label>
                       <button v-if="restaurantSettings.product_placeholder_url" type="button" @click="restaurantSettings.product_placeholder_url = ''"
@@ -749,21 +885,30 @@
                   </div>
                 </div>
               </section>
+              <section class="p-6 border-b border-gray-200 space-y-5">
+                <div><h2 class="text-sm font-bold">Informações exibidas no cardápio</h2><p class="text-[10px] text-gray-500 mt-1">Preencha os dados e selecione quais grupos os clientes podem ver.</p></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  <fieldset class="rounded-lg border border-gray-200 p-4 space-y-3"><label class="flex items-center justify-between font-bold"><span>Funcionamento</span><input v-model="restaurantSettings.menu_information.visibility.operating" type="checkbox" class="accent-orange-600"></label><label class="block text-[10px] text-gray-600">Fuso horário<select v-model="restaurantSettings.menu_information.timezone" class="mt-1 w-full rounded border border-gray-300 p-2"><option value="America/Sao_Paulo">Brasília (America/Sao_Paulo)</option></select></label><div v-for="day in weekdays" :key="day.key" class="grid grid-cols-[70px_1fr_1fr] gap-2 items-center"><label class="text-[10px]"><input v-model="restaurantSettings.menu_information.hours[day.key][0].enabled" type="checkbox" class="mr-1 accent-orange-600">{{ day.label }}</label><input v-model="restaurantSettings.menu_information.hours[day.key][0].open" type="time" aria-label="Horário de abertura" class="rounded border border-gray-300 p-1"><input v-model="restaurantSettings.menu_information.hours[day.key][0].close" type="time" aria-label="Horário de fechamento" class="rounded border border-gray-300 p-1"></div></fieldset>
+                  <fieldset class="rounded-lg border border-gray-200 p-4 space-y-3"><label class="flex items-center justify-between font-bold"><span>Entrega</span><input v-model="restaurantSettings.menu_information.visibility.delivery" type="checkbox" class="accent-orange-600"></label><label class="block text-[10px] text-gray-600">Prazo estimado<input v-model.trim="restaurantSettings.menu_information.delivery.estimate" maxlength="80" placeholder="Ex.: 30–45 min" class="mt-1 w-full rounded border border-gray-300 p-2"></label><label class="block text-[10px] text-gray-600">Taxa de entrega (R$)<input v-model.number="restaurantSettings.menu_information.delivery.fee" min="0" step="0.01" type="number" placeholder="0,00" class="mt-1 w-full rounded border border-gray-300 p-2"></label></fieldset>
+                  <fieldset class="rounded-lg border border-gray-200 p-4 space-y-3"><label class="flex items-center justify-between font-bold"><span>Localização</span><input v-model="restaurantSettings.menu_information.visibility.location" type="checkbox" class="accent-orange-600"></label><label class="block text-[10px] text-gray-600">Endereço<textarea v-model.trim="restaurantSettings.menu_information.location.address" maxlength="240" rows="2" class="mt-1 w-full rounded border border-gray-300 p-2"></textarea></label><label class="block text-[10px] text-gray-600">Link do mapa (HTTPS)<input v-model.trim="restaurantSettings.menu_information.location.map_url" type="url" placeholder="https://maps.google.com/..." class="mt-1 w-full rounded border border-gray-300 p-2"></label></fieldset>
+                  <fieldset class="rounded-lg border border-gray-200 p-4 space-y-3"><label class="flex items-center justify-between font-bold"><span>Contato e redes sociais</span><input v-model="restaurantSettings.menu_information.visibility.contact" type="checkbox" class="accent-orange-600"></label><label class="block text-[10px] text-gray-600">Telefone<input v-model.trim="restaurantSettings.menu_information.contact.phone" inputmode="tel" placeholder="(11) 99999-9999" class="mt-1 w-full rounded border border-gray-300 p-2"></label><label class="block text-[10px] text-gray-600">WhatsApp<input v-model.trim="restaurantSettings.menu_information.contact.whatsapp" inputmode="tel" placeholder="11999999999" class="mt-1 w-full rounded border border-gray-300 p-2"></label><label class="flex items-center justify-between font-bold pt-2"><span>Links sociais</span><input v-model="restaurantSettings.menu_information.visibility.social" type="checkbox" class="accent-orange-600"></label><input v-model.trim="restaurantSettings.menu_information.social.instagram" type="url" placeholder="https://instagram.com/..." aria-label="Instagram" class="w-full rounded border border-gray-300 p-2"><input v-model.trim="restaurantSettings.menu_information.social.facebook" type="url" placeholder="https://facebook.com/..." aria-label="Facebook" class="w-full rounded border border-gray-300 p-2"><input v-model.trim="restaurantSettings.menu_information.social.website" type="url" placeholder="https://seusite.com" aria-label="Site" class="w-full rounded border border-gray-300 p-2"></fieldset>
+                </div>
+              </section>
               <footer class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-                <button type="button" @click="resetRestaurantSettings" class="px-4 py-2 rounded-md border border-[#d34000] text-[#b72e00] text-xs font-bold">Descartar</button>
-                <button :disabled="loading.settings" class="px-5 py-2 rounded-md bg-[#b72e00] hover:bg-[#972600] text-white text-xs font-bold disabled:opacity-60">
-                  <i v-if="loading.settings" class="fa-solid fa-spinner animate-spin mr-1"></i>{{ loading.settings ? 'Salvando...' : 'Salvar Alterações' }}
+                <button type="button" @click="resetRestaurantSettings" class="px-4 py-2 rounded-md border border-primary-500 text-primary-700 text-xs font-bold">Descartar</button>
+                <button :disabled="loading.settings" class="px-5 py-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold disabled:opacity-60">
+                  <i v-if="loading.settings" class="lni lni-spinner-3 animate-spin mr-1"></i>{{ loading.settings ? 'Salvando...' : 'Salvar Alterações' }}
                 </button>
               </footer>
             </form>
           </div>
           <!-- CATEGORIES SUBTAB                              -->
           <!-- ============================================== -->
-          <div v-if="adminActiveSubTab === 'categories'" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div v-if="adminActiveSubTab === 'categories'" class="ui-panel grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- Create Category Form (POST /api/v1/categories) -->
+            <!-- Create Category Form (scoped categories endpoint) -->
             <div class="lg:col-span-4 bg-white border rounded-xl p-5 self-start shadow-sm">
-              <h2 class="text-lg font-bold text-gray-900 mb-4"><i class="fa-solid fa-plus-circle text-primary-500"></i> Nova Categoria</h2>
+              <h2 class="text-lg font-bold text-gray-900 mb-4"><i class="lni lni-plus-circle text-primary-500"></i> Nova Categoria</h2>
               <form @submit.prevent="createCategory" class="space-y-4">
                 <div>
                   <label class="block text-xs font-semibold text-gray-700 mb-1">Nome *</label>
@@ -783,8 +928,8 @@
 
                 <button type="submit" :disabled="loading.newCategory"
                         class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-all shadow-md flex items-center justify-center gap-2">
-                  <span v-if="loading.newCategory"><i class="fa-solid fa-spinner animate-spin"></i> Salvando...</span>
-                  <span v-else><i class="fa-solid fa-save"></i> Salvar Categoria</span>
+                  <span v-if="loading.newCategory"><i class="lni lni-spinner-3 animate-spin"></i> Salvando...</span>
+                  <span v-else><i class="lni lni-floppy-disk-1"></i> Salvar Categoria</span>
                 </button>
               </form>
             </div>
@@ -812,10 +957,10 @@
                       <td class="p-3 text-xs text-gray-500">{{ cat.description || '-' }}</td>
                       <td class="p-3 text-right pr-5">
                         <button @click="openEditCategory(cat)" class="text-gray-400 hover:text-primary-600 p-1" title="Editar Categoria">
-                          <i class="fa-regular fa-pen-to-square"></i>
+                          <i class="lni lni-pen-to-square"></i>
                         </button>
                         <button @click="deleteCategory(cat.id)" class="text-gray-400 hover:text-red-600 p-1" title="Excluir Categoria">
-                          <i class="fa-regular fa-trash-can"></i>
+                          <i class="lni lni-trash-3"></i>
                         </button>
                       </td>
                     </tr>
@@ -827,19 +972,16 @@
               </div>
             </div>
           </div>
-
+          </div>
+          <!-- /Content Area -->
         </div>
+        <!-- /Admin Workspace Dashboard Content -->
 
       </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-4 mt-auto">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-gray-500">
-        PedeAI Admin &bull; Dashboard integrado com a API Swagger/OpenAPI.
-      </div>
-    </footer>
 
   </div>
 
@@ -885,7 +1027,19 @@
         const editUserForm = reactive({ name: '', email: '', password: '', role: 'funcionario', permissions: {} });
         const availablePermissions = ['orders:read', 'orders:update', 'products:read', 'products:write', 'categories:write', 'users:read'];
         const newUserForm = reactive({ name: '', email: '', password: '', role: 'funcionario', permissions: {} });
-        const restaurantSettings = reactive({ name: '', menu_description: '', banner_url: '', logo_url: '', product_placeholder_url: '', primary_color: '#d34000' });
+        const supportedFonts = [
+          { id: 'inter', name: 'Inter', category: 'Sem serifa · Moderna', css: "'Inter', sans-serif" },
+          { id: 'roboto', name: 'Roboto', category: 'Sem serifa · Neutra', css: "'Roboto', sans-serif" },
+          { id: 'montserrat', name: 'Montserrat', category: 'Sem serifa · Geométrica', css: "'Montserrat', sans-serif" },
+          { id: 'poppins', name: 'Poppins', category: 'Sem serifa · Arredondada', css: "'Poppins', sans-serif" },
+          { id: 'playfair-display', name: 'Playfair Display', category: 'Com serifa · Elegante', css: "'Playfair Display', serif" },
+          { id: 'open-sans', name: 'Open Sans', category: 'Sem serifa · Legível', css: "'Open Sans', sans-serif" }
+        ];
+
+        const weekdays = [{ key: '0', label: 'Dom' }, { key: '1', label: 'Seg' }, { key: '2', label: 'Ter' }, { key: '3', label: 'Qua' }, { key: '4', label: 'Qui' }, { key: '5', label: 'Sex' }, { key: '6', label: 'Sáb' }];
+        const defaultMenuInformation = () => ({ timezone: 'America/Sao_Paulo', hours: Object.fromEntries(weekdays.map(day => [day.key, [{ enabled: false, open: '18:00', close: '23:00' }]])), delivery: { estimate: '', fee: null }, location: { address: '', map_url: '' }, contact: { phone: '', whatsapp: '' }, social: { instagram: '', facebook: '', website: '' }, visibility: { operating: false, delivery: false, location: false, contact: false, social: false } });
+        const normalizeMenuInformation = information => { const defaults = defaultMenuInformation(), source = information || {}; return { ...defaults, ...source, hours: { ...defaults.hours, ...(source.hours || {}) }, delivery: { ...defaults.delivery, ...(source.delivery || {}) }, location: { ...defaults.location, ...(source.location || {}) }, contact: { ...defaults.contact, ...(source.contact || {}) }, social: { ...defaults.social, ...(source.social || {}) }, visibility: { ...defaults.visibility, ...(source.visibility || {}) } }; };
+        const restaurantSettings = reactive({ name: '', menu_description: '', banner_url: '', logo_url: '', product_placeholder_url: '', primary_color: '#d34000', font_family: 'inter', menu_information: defaultMenuInformation() });
         const savedRestaurantSettings = ref(null);
         const adminOrders = ref([]);
         const orderSearchTerm = ref('');
@@ -904,18 +1058,26 @@
           description: '',
           price: '',
           available: true,
-          image_url: ''
+          image_url: '', image_file: null,
+          addons: [], variants: []
+        });
+        const menuImportFile = ref(null);
+        const menuImportTemplateUrl = `${API_BASE}/menu-import-template.json`;
+        const canImportMenu = computed(() => {
+          const user = adminAuth.user;
+          return user?.role === 'superAdmin' || user?.role === 'admin' || Boolean(user?.permissions?.['categories:write'] && user?.permissions?.['products:write']);
         });
         const editingCategory = ref(null);
         const editCategoryForm = reactive({ name: '', description: '', position: 0 });
         const editingProduct = ref(null);
-        const editProductForm = reactive({ category_id: '', name: '', description: '', price: '', available: true, image_url: '' });
+        const editProductForm = reactive({ category_id: '', name: '', description: '', price: '', available: true, image_url: '', image_file: null, addons: [], variants: [] });
 
         const loading = reactive({
           login: false,
           orders: false,
           newCategory: false,
           newProduct: false,
+          menuImport: false,
           users: false,
           userRestaurants: false,
           newUser: false,
@@ -971,9 +1133,9 @@
           };
         });
         const dashboardCards = computed(() => [
-          { label: 'FATURAMENTO TOTAL', value: 'R$ ' + formatMoney(dashboardMetrics.value.revenue), caption: dashboardMetrics.value.activeOrders + ' pedidos ativos hoje', icon: 'fa-solid fa-money-bill-wave', trendIcon: 'fa-solid fa-arrow-trend-up' },
-          { label: 'TICKET MÉDIO', value: 'R$ ' + formatMoney(dashboardMetrics.value.averageTicket), caption: 'Pedidos não cancelados', icon: 'fa-solid fa-receipt', trendIcon: 'fa-solid fa-minus' },
-          { label: 'PEDIDOS CONCLUÍDOS', value: dashboardMetrics.value.completed, caption: dashboardMetrics.value.total + ' pedidos recebidos hoje', icon: 'fa-solid fa-bag-shopping', trendIcon: 'fa-solid fa-arrow-trend-up' }
+          { label: 'FATURAMENTO TOTAL', value: 'R$ ' + formatMoney(dashboardMetrics.value.revenue), caption: dashboardMetrics.value.activeOrders + ' pedidos ativos hoje', icon: 'lni lni-dollar', trendIcon: 'lni lni-trend-up-1' },
+          { label: 'TICKET MÉDIO', value: 'R$ ' + formatMoney(dashboardMetrics.value.averageTicket), caption: 'Pedidos não cancelados', icon: 'lni lni-agenda', trendIcon: 'lni lni-minus' },
+          { label: 'PEDIDOS CONCLUÍDOS', value: dashboardMetrics.value.completed, caption: dashboardMetrics.value.total + ' pedidos recebidos hoje', icon: 'lni lni-basket-shopping-3', trendIcon: 'lni lni-trend-up-1' }
         ]);
         const dashboardHourlySales = computed(() => {
           const hours = [8, 10, 12, 14, 16, 18, 20, 22];
@@ -1009,46 +1171,40 @@
             if (minutes >= 20) alerts.push({
               key: 'order-' + order.id, title: 'Pedido #' + order.id + ' com atraso',
               description: order.customer_name + ' aguarda há ' + minutes + ' minutos na etapa ' + getStatusLabel(order.status) + '.',
-              time: 'Há ' + minutes + ' minutos', icon: 'fa-solid fa-triangle-exclamation text-red-600', boxClass: 'bg-red-50 border-red-200'
+              time: 'Há ' + minutes + ' minutos', icon: 'lni lni-info text-red-600', boxClass: 'bg-red-50 border-red-200'
             });
           });
           products.value.filter(product => !product.available).slice(0, 3).forEach(product => alerts.push({
             key: 'product-' + product.id, title: 'Produto indisponível',
             description: product.name + ' está marcado como indisponível no cardápio.',
-            time: 'Requer atenção', icon: 'fa-solid fa-box-archive text-amber-700', boxClass: 'bg-amber-50 border-amber-300'
+            time: 'Requer atenção', icon: 'lni lni-box-archive-1 text-amber-700', boxClass: 'bg-amber-50 border-amber-300'
           }));
           if (dashboardMetrics.value.completed >= 50) alerts.push({
             key: 'sales-goal', title: 'Pico de vendas atingido',
             description: 'A operação ultrapassou 50 pedidos concluídos hoje.',
-            time: 'Hoje', icon: 'fa-regular fa-circle-check text-[#b72e00]', boxClass: 'bg-white border-transparent'
+            time: 'Hoje', icon: 'lni lni-check-circle-1 text-primary-700', boxClass: 'bg-white border-transparent'
           });
           return alerts.slice(0, 5);
         });
         // API Request Helper
         const pathParts = window.location.pathname.split('/').filter(Boolean);
         const restaurantSlug = document.body.dataset.restaurantSlug || (pathParts[0] === 'admin' ? pathParts[1] : null);
-        const normalizedApiUrl = url => url.startsWith('/api/v1/') ? url : `/api/v1${url}`;
-        const scopedUrl = url => {
-          const normalizedUrl = normalizedApiUrl(url);
-          const activeRestaurantSlug = restaurantSlug || userRestaurantSlug.value;
-          const isRestaurantScoped = normalizedUrl.startsWith('/api/v1/restaurants/');
-          const isScopedResource = /^\/api\/v1\/(categories|products|orders|users)(?:\/|$)/.test(normalizedUrl);
-          if (!activeRestaurantSlug || isRestaurantScoped || !isScopedResource) return normalizedUrl;
-          return `/api/v1/restaurants/${encodeURIComponent(activeRestaurantSlug)}${normalizedUrl.slice('/api/v1'.length)}`;
-        };
-        const userRestaurantSlug = ref(restaurantSlug || '');
+        const userRestaurantSlug = ref(restaurantSlug || localStorage.getItem('pedeai_restaurant_slug') || '');
+        const restaurantApi = () => `/api/v1/restaurants/${encodeURIComponent(userRestaurantSlug.value)}`;
+        const restaurantResource = path => `${restaurantApi()}/${path}`;
 
         const apiRequest = async (url, options = {}) => {
           const headers = {
             'Content-Type': 'application/json',
             ...(options.headers || {})
           };
+          if (options.body instanceof FormData) delete headers['Content-Type'];
 
           if (adminAuth.token) {
             headers['Authorization'] = `Bearer ${adminAuth.token}`;
           }
 
-          const response = await fetch(`${API_BASE}${scopedUrl(url)}`, { ...options, headers });
+          const response = await fetch(`${API_BASE}${url}`, { ...options, headers });
           if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
             throw { status: response.status, data: errData };
@@ -1057,19 +1213,11 @@
           return response.json();
         };
 
-        const usersUrl = () => `/api/v1/restaurants/${encodeURIComponent(userRestaurantSlug.value)}/users`;
+        const usersUrl = () => restaurantResource('users');
         const canManageUser = user => user.id !== adminAuth.user?.id && (adminAuth.user?.role === 'superAdmin' || user.role === 'funcionario');
         const loadUserRestaurants = async () => {
-          if (restaurantSlug) return;
-          loading.userRestaurants = true;
-          try {
-            userRestaurants.value = await apiRequest('/api/v1/restaurants');
-            if (userRestaurants.value.length > 0) userRestaurantSlug.value = userRestaurants.value[0].slug;
-          } catch (err) {
-            addToast(err.data?.message || 'Erro ao carregar restaurantes.', 'error');
-          } finally {
-            loading.userRestaurants = false;
-          }
+          if (!userRestaurantSlug.value) return;
+          userRestaurants.value = [{ slug: userRestaurantSlug.value }];
         };
         const ensureUserRestaurant = async () => {
           if (userRestaurantSlug.value) return true;
@@ -1111,7 +1259,7 @@
             loading.newUser = false;
           }
         };
-        const restaurantSettingsUrl = () => '/api/v1/restaurants/' + encodeURIComponent(restaurantSlug || userRestaurantSlug.value);
+        const restaurantSettingsUrl = () => restaurantApi();
         const applyRestaurantSettings = restaurant => {
           const values = {
             name: restaurant.name || '',
@@ -1119,7 +1267,9 @@
             banner_url: restaurant.banner_url || '',
             logo_url: restaurant.logo_url || '',
             product_placeholder_url: restaurant.product_placeholder_url || '',
-            primary_color: restaurant.primary_color || '#d34000'
+            primary_color: restaurant.primary_color || '#d34000',
+            font_family: restaurant.font_family || 'inter',
+            menu_information: normalizeMenuInformation(restaurant.menu_information)
           };
           Object.assign(restaurantSettings, values);
           savedRestaurantSettings.value = { ...values };
@@ -1210,7 +1360,7 @@
         // Categories
         const loadCategories = async () => {
           try {
-            categories.value = await apiRequest('/api/v1/categories');
+            categories.value = await apiRequest(restaurantResource('categories'));
           } catch (err) {
             console.error('Categories error:', err);
           }
@@ -1219,7 +1369,7 @@
         // Products
         const loadProducts = async () => {
           try {
-            products.value = await apiRequest('/api/v1/products');
+            products.value = await apiRequest(restaurantResource('products') + '?admin=true');
           } catch (err) {
             console.error('Products error:', err);
           }
@@ -1230,7 +1380,7 @@
           if (!adminAuth.token) return;
           loading.orders = true;
           try {
-            adminOrders.value = await apiRequest('/api/v1/orders');
+            adminOrders.value = await apiRequest(restaurantResource('orders'));
           } catch (err) {
             if (err.status === 401) {
               logout();
@@ -1261,8 +1411,10 @@
 
             adminAuth.token = res.token;
             adminAuth.user = res.user;
+            userRestaurantSlug.value = res.restaurant.slug;
             localStorage.setItem('pedeai_token', res.token);
             localStorage.setItem('pedeai_user', JSON.stringify(res.user));
+            localStorage.setItem('pedeai_restaurant_slug', res.restaurant.slug);
             
             adminAuth.email = '';
             adminAuth.password = '';
@@ -1283,16 +1435,18 @@
           adminAuth.user = null;
           localStorage.removeItem('pedeai_token');
           localStorage.removeItem('pedeai_user');
+          localStorage.removeItem('pedeai_restaurant_slug');
+          userRestaurantSlug.value = restaurantSlug || '';
           adminOrders.value = [];
           addToast('Sessão encerrada.', 'info');
         };
 
-        // Status update (PATCH /api/v1/orders/:id)
+        // Status update (scoped order endpoint)
         const updateOrderStatus = async (orderId, newStatus) => {
           if (!orderKanbanColumns.some(column => column.value === newStatus)) return;
           loading.updateOrderId = orderId;
           try {
-            const updatedOrder = await apiRequest('/api/v1/orders/' + orderId, {
+            const updatedOrder = await apiRequest(restaurantResource('orders/' + orderId), {
               method: 'PATCH',
               body: JSON.stringify({ order: { status: newStatus } })
             });
@@ -1321,7 +1475,7 @@
           if (!draggedOrder.value || draggedOrder.value.status === status || isTerminalOrder(draggedOrder.value)) return;
           updateOrderStatus(draggedOrder.value.id, status);
         };
-        // Create Category (POST /api/v1/categories)
+        // Create Category
         const createCategory = async () => {
           loading.newCategory = true;
           try {
@@ -1332,7 +1486,7 @@
                 position: parseInt(newCategoryForm.position) || 0
               }
             };
-            const saved = await apiRequest('/api/v1/categories', {
+            const saved = await apiRequest(restaurantResource('categories'), {
               method: 'POST',
               body: JSON.stringify(payload)
             });
@@ -1366,7 +1520,7 @@
         const updateCategory = async () => {
           if (!editingCategory.value) return;
           try {
-            const saved = await apiRequest(`/api/v1/categories/${editingCategory.value.id}`, {
+            const saved = await apiRequest(restaurantResource(`categories/${editingCategory.value.id}`), {
               method: 'PATCH',
               body: JSON.stringify({ category: { ...editCategoryForm } })
             });
@@ -1379,11 +1533,11 @@
           }
         };
 
-        // Delete Category (DELETE /api/v1/categories/:id)
+        // Delete Category
         const deleteCategory = async (id) => {
           if (!confirm('Deseja realmente remover esta categoria?')) return;
           try {
-            await apiRequest(`/api/v1/categories/${id}`, { method: 'DELETE' });
+            await apiRequest(restaurantResource(`categories/${id}`), { method: 'DELETE' });
             categories.value = categories.value.filter(c => c.id !== id);
             addToast('Categoria removida com sucesso.', 'info');
           } catch (err) {
@@ -1392,23 +1546,47 @@
           }
         };
 
-        // Create Product (POST /api/v1/products)
+        const appendFormDataValue = (formData, key, value) => {
+          if (value === null || value === undefined) return;
+          if (value instanceof File) { formData.append(key, value); return; }
+          if (Array.isArray(value)) { value.forEach(item => appendFormDataValue(formData, `${key}[]`, item)); return; }
+          if (typeof value === 'object') { Object.entries(value).forEach(([childKey, childValue]) => appendFormDataValue(formData, `${key}[${childKey}]`, childValue)); return; }
+          formData.append(key, String(value));
+        };
+        const productMutationBody = form => {
+          const product = { category_id: form.category_id, name: form.name, description: form.description, price: form.price, available: form.available, image_url: form.image_url || null, addons: form.addons, variants: form.variants.map((variant, position) => ({ ...variant, position })) };
+          if (!form.image_file) return { body: JSON.stringify({ product }) };
+          const formData = new FormData();
+          appendFormDataValue(formData, 'product', product);
+          formData.append('product[image]', form.image_file);
+          return { body: formData };
+        };
+
+        const importMenu = async () => {
+          if (!menuImportFile.value) return;
+          loading.menuImport = true;
+          try {
+            const formData = new FormData();
+            formData.append('file', menuImportFile.value);
+            const result = await apiRequest(restaurantResource('menu-import'), { method: 'POST', body: formData });
+            await Promise.all([loadCategories(), loadProducts()]);
+            menuImportFile.value = null;
+            addToast(`Cardápio importado: ${result.categories_created} categoria(s) e ${result.products_created} produto(s).`, 'success');
+          } catch (err) {
+            addToast(err.data?.messages?.join(', ') || 'Não foi possível importar o cardápio.', 'error');
+          } finally {
+            loading.menuImport = false;
+          }
+        };
+
+
+        // Create Product
         const createProduct = async () => {
           loading.newProduct = true;
           try {
-            const payload = {
-              product: {
-                category_id: parseInt(newProductForm.category_id),
-                name: newProductForm.name,
-                description: newProductForm.description,
-                price: parseFloat(newProductForm.price),
-                available: newProductForm.available,
-                image_url: newProductForm.image_url || null
-              }
-            };
-            const saved = await apiRequest('/api/v1/products', {
+            const saved = await apiRequest(restaurantResource('products'), {
               method: 'POST',
-              body: JSON.stringify(payload)
+              ...productMutationBody({ ...newProductForm, category_id: parseInt(newProductForm.category_id), price: parseFloat(newProductForm.price) })
             });
 
             const associatedCat = categories.value.find(c => c.id === saved.category_id);
@@ -1422,7 +1600,10 @@
             newProductForm.description = '';
             newProductForm.price = '';
             newProductForm.image_url = '';
+            newProductForm.image_file = null;
             newProductForm.available = true;
+            newProductForm.addons = [];
+            newProductForm.variants = [];
             addToast('Produto cadastrado com sucesso!', 'success');
           } catch (err) {
             const msg = err.data?.messages?.join(', ') || err.data?.error || 'Erro ao cadastrar produto';
@@ -1441,20 +1622,33 @@
             description: product.description || '',
             price: product.price,
             available: product.available,
-            image_url: product.image_url || ''
+            image_url: product.image_url || '', image_file: null,
+            addons: (product.addons || []).map(addon => ({ id: addon.id, name: addon.name, price: addon.price, available: addon.available })), variants: (product.variants || []).map((variant, position) => ({ id: variant.id, name: variant.name, price: variant.price, available: variant.available, position }))
           });
         };
 
         const closeEditProduct = () => {
           editingProduct.value = null;
-          Object.assign(editProductForm, { category_id: '', name: '', description: '', price: '', available: true, image_url: '' });
+          Object.assign(editProductForm, { category_id: '', name: '', description: '', price: '', available: true, image_url: '', image_file: null, addons: [], variants: [] });
         };
 
         const updateProduct = async () => {
           if (!editingProduct.value) return;
           try {
-            const payload = { product: { ...editProductForm, image_url: editProductForm.image_url || null } };
-            const saved = await apiRequest(`/api/v1/products/${editingProduct.value.id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+            const source = editingProduct.value;
+            const form = {
+              ...editProductForm,
+              category_id: Number(editProductForm.category_id),
+              name: String(editProductForm.name || '').trim(),
+              description: editProductForm.description || '',
+              price: Number(editProductForm.price),
+              available: Boolean(editProductForm.available)
+            };
+            if (!form.name || !Number.isFinite(form.price) || form.price <= 0) {
+              addToast('Revise o nome e o preço do produto antes de salvar.', 'error');
+              return;
+            }
+            const saved = await apiRequest(restaurantResource(`products/${source.id}`), { method: 'PATCH', ...productMutationBody(form) });
             const category = categories.value.find(item => item.id === saved.category_id);
             Object.assign(editingProduct.value, saved, { category: category ? { name: category.name } : null });
             products.value.sort((a, b) => a.name.localeCompare(b.name));
@@ -1465,11 +1659,16 @@
           }
         };
 
-        // Delete Product (DELETE /api/v1/products/:id)
+        const addAddon = form => form.addons.push({ name: '', price: '', available: true });
+        const removeAddon = (form, index) => form.addons.splice(index, 1);
+        const addVariant = form => form.variants.push({ name: '', price: '', available: true, position: form.variants.length });
+        const removeVariant = (form, index) => form.variants.splice(index, 1);
+
+        // Delete Product
         const deleteProduct = async (id) => {
           if (!confirm('Deseja realmente excluir este produto?')) return;
           try {
-            await apiRequest(`/api/v1/products/${id}`, { method: 'DELETE' });
+            await apiRequest(restaurantResource(`products/${id}`), { method: 'DELETE' });
             products.value = products.value.filter(p => p.id !== id);
             addToast('Produto excluído com sucesso.', 'info');
           } catch (err) {
@@ -1569,6 +1768,8 @@
           editUserForm,
           availablePermissions,
           newUserForm,
+          supportedFonts,
+          weekdays,
           restaurantSettings,
           openRestaurantSettings,
           resetRestaurantSettings,
@@ -1590,6 +1791,9 @@
           ordersForColumn,
           newCategoryForm,
           newProductForm,
+          menuImportFile,
+          menuImportTemplateUrl,
+          canImportMenu,
           pendingOrdersCount,
           dashboardDate,
           dashboardMetrics,
@@ -1608,10 +1812,15 @@
           updateCategory,
           deleteCategory,
           createProduct,
+          importMenu,
           openEditProduct,
           closeEditProduct,
           updateProduct,
           deleteProduct,
+          addAddon,
+          addVariant,
+          removeVariant,
+          removeAddon,
           editingCategory,
           editCategoryForm,
           editingProduct,

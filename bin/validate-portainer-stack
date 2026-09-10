@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+env_file="${1:-deploy/.env.example}"
+compose_file="deploy/portainer-stack.yml"
+
+test -f "$env_file" || { echo "Arquivo de ambiente não encontrado: $env_file" >&2; exit 2; }
+docker compose --env-file "$env_file" -f "$compose_file" config --quiet
+
+if docker compose --env-file "$env_file" -f "$compose_file" config | grep -Eq 'published: (5432|6379)$'; then
+  echo "PostgreSQL/Redis não podem ter portas públicas" >&2
+  exit 1
+fi
+
+echo "Stack Portainer válida: $compose_file"

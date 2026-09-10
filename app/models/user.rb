@@ -8,6 +8,7 @@
   validates :name, presence: true, length: { in: 2..120 }
   validates :email, presence: true, uniqueness: { case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :role, inclusion: { in: ROLES }
+  validates_text_encoding :name, :email
   validates :role, uniqueness: { scope: :restaurant_id, message: "já possui um superAdmin" }, if: :super_admin?
 
   normalizes :email, with: ->(email) { email.strip.downcase }

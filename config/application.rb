@@ -8,6 +8,8 @@ module Pedeai
   class Application < Rails::Application
     config.load_defaults 8.1
     config.api_only = true
+    config.encoding = "utf-8"
+    config.public_file_server.enabled = true
     config.autoload_lib(ignore: %w[assets tasks])
     config.time_zone = "America/Sao_Paulo"
   end

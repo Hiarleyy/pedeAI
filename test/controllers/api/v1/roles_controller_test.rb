@@ -51,7 +51,7 @@ class Api::V1::RolesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "admin cria e gerencia apenas funcionários" do
-    post "/api/v1/restaurants/#{@restaurant.id}/users", params: { user: { name: "Novo", email: "novo@example.com", password: "secret123", role: "funcionario", permissions: { "orders:read" => true } } }, headers: auth(@admin), as: :json
+    post "/api/v1/restaurants/#{@restaurant.slug}/users", params: { user: { name: "Novo", email: "novo@example.com", password: "secret123", role: "funcionario", permissions: { "orders:read" => true } } }, headers: auth(@admin), as: :json
 
     assert_response :created
     employee = User.find(response.parsed_body["id"])
@@ -59,7 +59,7 @@ class Api::V1::RolesControllerTest < ActionDispatch::IntegrationTest
     patch "/api/v1/restaurants/#{@restaurant.slug}/users/#{employee.id}", params: { user: { name: "Equipe Atualizada", role: "funcionario", permissions: { "users:read" => true } } }, headers: auth(@admin), as: :json
     assert_response :success
 
-    post "/api/v1/restaurants/#{@restaurant.id}/users", params: { user: { name: "Outro Admin", email: "outro.admin@example.com", password: "secret123", role: "admin" } }, headers: auth(@admin), as: :json
+    post "/api/v1/restaurants/#{@restaurant.slug}/users", params: { user: { name: "Outro Admin", email: "outro.admin@example.com", password: "secret123", role: "admin" } }, headers: auth(@admin), as: :json
     assert_response :forbidden
   end
 
@@ -67,7 +67,7 @@ class Api::V1::RolesControllerTest < ActionDispatch::IntegrationTest
     patch "/api/v1/restaurants/#{@restaurant.slug}/users/#{@admin.id}", params: { user: { name: "Admin Alterado" } }, headers: auth(@admin), as: :json
     assert_response :forbidden
 
-    post "/api/v1/restaurants/#{@restaurant.id}/users", params: { user: { name: "Outro", email: "outro@example.com", password: "secret123", role: "funcionario" } }, headers: auth(@employee), as: :json
+    post "/api/v1/restaurants/#{@restaurant.slug}/users", params: { user: { name: "Outro", email: "outro@example.com", password: "secret123", role: "funcionario" } }, headers: auth(@employee), as: :json
     assert_response :forbidden
   end
 
@@ -106,6 +106,24 @@ class Api::V1::RolesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Culinária artesanal", @restaurant.reload.menu_description
     assert_equal "#b72e00", @restaurant.primary_color
     assert_equal "https://example.com/placeholder.png", @restaurant.product_placeholder_url
+  end
+
+  test "admin atualiza perfil de informações do restaurante" do
+    profile = {
+      timezone: "America/Sao_Paulo",
+      hours: { "1" => [{ open: "10:00", close: "22:00", enabled: true }] },
+      delivery: { estimate: "30-45 min", fee: 4.5 },
+      location: { address: "Rua Central, 100", map_url: "https://maps.example.com/central" },
+      contact: { phone: "11999999999", whatsapp: "11999999999" },
+      social: { instagram: "https://instagram.com/pedeai", facebook: "https://facebook.com/pedeai", website: "https://pedeai.example.com" },
+      visibility: { operating: true, delivery: true, location: true, contact: true, social: true }
+    }
+
+    patch "/api/v1/restaurants/#{@restaurant.slug}", params: { restaurant: { menu_information: profile } }, headers: auth(@admin), as: :json
+
+    assert_response :success
+    assert_equal "30-45 min", response.parsed_body.dig("menu_information", "delivery", "estimate")
+    assert_equal true, response.parsed_body.dig("menu_information", "visibility", "delivery")
   end
 
   test "funcionário não atualiza configurações do restaurante" do

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+role="${1:-web}"
+shift || true
+
+case "$role" in
+  web) exec bundle exec rails server -b 0.0.0.0 -p "${PORT:-3000}" "$@" ;;
+  worker) exec bundle exec sidekiq -C config/sidekiq.yml "$@" ;;
+  migrate) exec bundle exec rails db:prepare "$@" ;;
+  *) echo "Uso: pedeai-entrypoint {web|worker|migrate}" >&2; exit 64 ;;
+esac

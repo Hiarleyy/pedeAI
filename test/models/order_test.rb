@@ -20,8 +20,8 @@ class OrderTest < ActiveSupport::TestCase
   end
 
   test "calcula total usando preco do produto" do
-    order = Order.create!(restaurant: @restaurant, customer_name: "Ana", customer_phone: "11999999999", order_type: "delivery", delivery_address: "Rua A, 1", payment_method: "pix")
-    order.order_items.create!(product: @product, quantity: 3)
+    order = Order.new(restaurant: @restaurant, customer_name: "Ana", customer_phone: "11999999999", order_type: "delivery", delivery_address: "Rua A, 1", payment_method: "pix")
+    order.order_items.build(product: @product, quantity: 3)
     order.save!
     assert_equal 60.to_d, order.reload.total
   end

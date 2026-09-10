@@ -4,12 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#b52b05">
+  <link rel="stylesheet" href="https://cdn.lineicons.com/5.0/lineicons.css">
   <title>Cardápio</title>
   <style>
-    :root { --accent: #b52b05; --ink: #161616; --muted: #686868; --line: #e6e6e6; --surface: #fff; --soft: #f6f6f6; }
+    :root { --accent: #b52b05; --ink: #161616; --muted: #686868; --line: #e6e6e6; --surface: #fff; --soft: #f6f6f6; --font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --motion-fast: 140ms; --motion-base: 220ms; --motion-ease: cubic-bezier(.2, .8, .2, 1); }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; scroll-padding-top: 60px; }
-    body { margin: 0; min-width: 280px; background: #ececec; color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; min-width: 280px; background: #ececec; color: var(--ink); font-family: var(--font-family); }
     button, input, select { font: inherit; }
     button { cursor: pointer; }
     img { display: block; max-width: 100%; }
@@ -18,18 +19,48 @@
     .hero img { width: 100%; height: 100%; object-fit: cover; }
     .hero::after { position: absolute; inset: 0; content: ""; background: rgb(0 0 0 / .12); pointer-events: none; }
     .round-button { position: absolute; z-index: 10; top: max(12px, env(safe-area-inset-top)); display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 999px; background: rgb(255 255 255 / .94); color: #222; box-shadow: 0 1px 4px rgb(0 0 0 / .18); }
-    .back { left: 12px; } .share { right: 12px; }
+    .share { right: 12px; }
+    .share-feedback { position: absolute; z-index: 11; top: max(54px, calc(env(safe-area-inset-top) + 42px)); right: 12px; max-width: min(240px, calc(100vw - 28px)); border-radius: 7px; padding: 7px 9px; background: rgb(25 20 18 / .88); color: #fff; font-size: 10px; font-weight: 700; line-height: 1.25; box-shadow: 0 3px 12px rgb(0 0 0 / .2); }
+    .share-feedback[hidden] { display: none; }
     .round-button svg { width: 20px; height: 20px; }
     .restaurant { padding: 14px 14px 12px; }
     h1 { margin: 0; font-size: 20px; line-height: 1.2; text-wrap: balance; }
     .status { display: flex; align-items: center; gap: 6px; margin: 8px 0 12px; color: var(--muted); font-size: 12px; }
     .status strong { color: var(--accent); }
     .status-dot { width: 7px; height: 7px; border: 1.5px solid var(--accent); border-radius: 50%; }
-    .delivery { display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border: 1px solid var(--line); border-radius: 9px; }
+    .delivery { display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #fffafa; }
     .delivery div { padding: 10px; text-align: center; font-size: 11px; color: var(--muted); }
     .delivery div + div { border-left: 1px solid var(--line); }
     .delivery strong { display: block; margin-top: 2px; color: var(--ink); font-size: 12px; }
     .delivery .free { color: var(--accent); }
+    .restaurant-information { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; font-size: 11px; color: var(--muted); }
+    .restaurant-information[hidden] { display: none; }
+    .restaurant-information-dynamic { display: contents; }
+    .restaurant-info-card { display: grid; grid-template-columns: 29px minmax(0, 1fr); align-items: center; gap: 7px; min-width: 0; min-height: 62px; border: 1px solid var(--line); border-radius: 11px; padding: 9px; background: #fffafa; box-shadow: 0 2px 7px rgb(55 25 15 / .05); }
+    .restaurant-info-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, white); font-size: 17px; }
+    .restaurant-info-copy { min-width: 0; }
+    .restaurant-info-label { display: block; margin-bottom: 2px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .restaurant-info-value { display: block; overflow-wrap: anywhere; color: var(--ink); font-size: 12px; font-weight: 800; line-height: 1.25; }
+    .restaurant-info-value a { color: var(--accent); font-weight: 800; text-decoration: none; }
+    .restaurant-info-value a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .restaurant-information a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .restaurant { margin-top: 0; border-radius: 0; padding: 16px 14px 12px; background: var(--surface); box-shadow: none; }
+    .restaurant > .status { display: none; }
+    .restaurant-description { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .restaurant-information { display: block; margin-top: 12px; color: var(--muted); font-size: 12px; }
+    .restaurant-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 0; padding: 13px 0; border-block: 1px solid var(--line); }
+    .restaurant-meta-item { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); line-height: 1.35; }
+    .restaurant-meta-item strong { color: var(--muted); font-weight: 700; }
+    .restaurant-meta-status strong { color: var(--muted); }
+    .restaurant-information-divider { margin: 0 7px; color: #d2ceca; }
+    .restaurant-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; min-width: 0; padding-top: 10px; }
+    .restaurant-action { display: inline-flex; align-items: center; gap: 6px; min-width: 0; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 700; }
+    .restaurant-action a, .restaurant-action a:visited { color: inherit; text-decoration: none; }
+    .restaurant-action > a { display: inline-flex; align-items: center; gap: 4px; }
+    .restaurant-action-icon { display: inline-block; flex: 0 0 auto; color: var(--accent); font-size: 16px; line-height: 1; vertical-align: middle; }
+    .restaurant-map { flex: 0 0 auto; color: var(--muted); }
+    .restaurant-action-separator { width: 1px; height: 20px; flex: 0 0 auto; background: var(--line); }
+    .restaurant-info-card, .restaurant-information-dynamic { display: none; }
     .category-nav { position: sticky; z-index: 20; top: 0; display: flex; gap: 8px; overflow-x: auto; padding: 10px 14px; border-block: 1px solid var(--line); background: rgb(255 255 255 / .97); scrollbar-width: none; }
     .category-nav::-webkit-scrollbar { display: none; }
     .category-nav button { flex: 0 0 auto; border: 0; border-radius: 999px; padding: 7px 13px; background: #eee; color: #343434; font-size: 11px; font-weight: 700; }
@@ -48,9 +79,9 @@
     .skeleton { min-height: 98px; margin-block: 12px; border-radius: 8px; background: #eee; }
     .empty { padding: 32px 16px; text-align: center; color: var(--muted); }
     .empty strong { display: block; margin-bottom: 5px; color: var(--ink); }
-    .cart-bar { position: fixed; z-index: 30; right: max(16px, calc((100vw - 430px) / 2 + 16px)); bottom: calc(16px + env(safe-area-inset-bottom)); display: grid; place-items: center; width: 64px; height: 64px; border: 0; border-radius: 50%; padding: 0; background: var(--accent); color: #fff; box-shadow: 0 4px 10px rgb(0 0 0 / .22); }
-    .cart-bar svg { width: 32px; height: 32px; }
-    .cart-count { position: absolute; top: -6px; right: -6px; display: grid; place-items: center; min-width: 30px; height: 30px; border: 2px solid var(--accent); border-radius: 50%; padding-inline: 5px; background: #fff; color: var(--accent); font-size: 14px; font-weight: 900; font-variant-numeric: tabular-nums; box-shadow: 0 2px 4px rgb(0 0 0 / .14); }
+    .cart-bar { position: fixed; z-index: 30; right: max(16px, calc((100vw - 430px) / 2 + 16px)); bottom: calc(16px + env(safe-area-inset-bottom)); display: grid; place-items: center; width: 56px; height: 56px; border: 0; border-radius: 50%; padding: 0; background: var(--accent); color: #fff; box-shadow: 0 4px 10px rgb(0 0 0 / .22); }
+    .cart-bar .lni { font-size: 26px; line-height: 1; }
+    .cart-count { position: absolute; top: -5px; right: -5px; display: grid; place-items: center; min-width: 22px; height: 22px; border: 2px solid #fff; border-radius: 50%; padding-inline: 4px; background: #fff; color: var(--accent); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; box-shadow: 0 2px 4px rgb(0 0 0 / .18); }
     .checkout-page { position: fixed; z-index: 100; inset: 0; width: 100%; height: 100dvh; margin: 0; color: var(--ink); background: #f4f5f7; }
     .checkout-page[hidden] { display: none; }
     .checkout-shell { display: flex; height: 100%; flex-direction: column; overflow: hidden; }
@@ -124,8 +155,8 @@
     .delivery-info { display: grid; gap: 9px; }
     .delivery-row { display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 8px; padding-bottom: 9px; border-bottom: 1px solid var(--line); font-size: 9px; }
     .delivery-row:last-child { padding-bottom: 0; border-bottom: 0; }
-    .delivery-row-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #eef2ff; color: #6076a5; }
-    .delivery-row-icon svg { width: 15px; height: 15px; }
+    .delivery-row-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 10%, white); color: var(--accent); }
+    .delivery-row-icon i { display: grid; place-items: center; width: 100%; height: 100%; font-size: 15px; line-height: 1; vertical-align: middle; }
     .delivery-row strong, .delivery-row span { display: block; }
     .delivery-row span { margin-top: 2px; color: var(--muted); }
     .confirmed-items { display: grid; gap: 7px; font-size: 9px; }
@@ -136,29 +167,131 @@
     .confirmed-summary-row.total { margin-top: 2px; font-size: 13px; font-weight: 900; }
     .confirmed-summary-row.total span:last-child { color: var(--accent); }
     .track-order { width: 100%; min-height: 40px; border: 0; border-radius: 21px; background: var(--accent); color: #fff; font-size: 9px; font-weight: 800; }
+    .tracking-bar { position: fixed; z-index: 31; left: max(14px, calc((100vw - 430px) / 2 + 14px)); bottom: calc(14px + env(safe-area-inset-bottom)); display: inline-flex; align-items: center; gap: 7px; min-height: 44px; border: 0; border-radius: 22px; padding: 0 15px; background: #2b2421; color: #fff; box-shadow: 0 7px 17px rgb(0 0 0 / .24); font-size: 10px; font-weight: 800; }
+    .tracking-bar .lni { font-size: 16px; }
+    .order-tracking-page { position: fixed; z-index: 120; inset: 0; display: grid; place-items: end center; padding: 16px; background: rgb(0 0 0 / .52); }
+    .order-tracking-page[hidden] { display: none; }
+    .order-tracking-shell { position: relative; width: min(430px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; border-radius: 18px; padding: 24px 17px calc(18px + env(safe-area-inset-bottom)); background: #fff; box-shadow: 0 18px 45px rgb(0 0 0 / .28); }
+    .order-tracking-shell h2 { margin: 0 36px 6px 0; font-size: 19px; letter-spacing: -.02em; }
+    .order-tracking-shell > p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .tracking-close { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 31px; height: 31px; border: 0; border-radius: 50%; background: #f2efed; color: var(--ink); font-size: 18px; }
+    .tracking-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; margin-top: 17px; }
+    .tracking-form input { min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px; color: var(--ink); font-size: 12px; }
+    .tracking-form button { border: 0; border-radius: 8px; padding: 0 13px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 800; }
+    .tracking-message { min-height: 16px; margin: 8px 0 0; color: #b42318; font-size: 10px; line-height: 1.35; }
+    .tracking-result { margin-top: 13px; border-top: 1px solid var(--line); padding-top: 14px; }
+    .tracking-result[hidden] { display: none; }
+    .tracking-result h3 { margin: 0 0 4px; font-size: 13px; }
+    .tracking-result > p { margin: 0; color: var(--muted); font-size: 10px; }
+    .tracking-timeline { display: grid; gap: 0; margin: 14px 0 0; padding: 0; list-style: none; }
+    .tracking-timeline li { position: relative; min-height: 34px; padding: 0 0 10px 25px; color: var(--muted); font-size: 10px; }
+    .tracking-timeline li::before { position: absolute; z-index: 1; top: 1px; left: 0; width: 10px; height: 10px; border: 2px solid #d8d1ce; border-radius: 50%; background: #fff; content: ""; }
+    .tracking-timeline li:not(:last-child)::after { position: absolute; top: 13px; bottom: 0; left: 5px; width: 2px; background: #e4ddda; content: ""; }
+    .tracking-timeline li.active { color: var(--ink); font-weight: 800; }
+    .tracking-timeline li.active::before { border-color: var(--accent); background: var(--accent); }
+    .tracking-timeline li.cancelled { color: #b42318; font-weight: 800; }
+    .tracking-timeline li.cancelled::before { border-color: #b42318; background: #b42318; }
+    .tracking-refresh { width: 100%; min-height: 37px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--accent); font-size: 10px; font-weight: 800; }
     .back-to-menu { display: block; margin: 13px auto 0; border: 0; background: transparent; color: var(--accent); font-size: 9px; font-weight: 800; }
+    /* Reference-inspired menu surface */
+    .mobile-menu { padding-bottom: calc(112px + env(safe-area-inset-bottom)); background: #fff; }
+    .hero { height: 174px; }
+    .hero::after { background: linear-gradient(180deg, rgb(0 0 0 / .42), rgb(0 0 0 / .04) 64%, rgb(0 0 0 / .15)); }
+    .round-button { width: 34px; height: 34px; color: #fff; background: rgb(25 20 18 / .66); box-shadow: none; backdrop-filter: blur(5px); }
+    .round-button:focus-visible, .category-nav button:focus-visible, .add:focus-visible, .cart-bar:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+    .restaurant { position: relative; z-index: 2; margin-top: -18px; border-radius: 20px 20px 0 0; padding: 16px 14px 12px; background: #fff; box-shadow: 0 -5px 16px rgb(0 0 0 / .06); }
+    h1 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+    .status { margin: 7px 0 13px; font-size: 11px; }
+    .status strong { color: #1d9a56; }
+    .status-dot { border-color: #1d9a56; background: #1d9a56; }
+    .delivery div { display: grid; grid-template-columns: 31px 1fr; align-items: center; gap: 5px; padding: 10px 9px; text-align: left; }
+    .delivery strong { font-size: 11px; }
+    .delivery-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, white); }
+    .delivery-icon svg { width: 16px; height: 16px; }
+    .category-nav { position: sticky; top: 0; gap: 7px; padding: 10px 14px 9px; border: 0; box-shadow: 0 3px 10px rgb(0 0 0 / .04); }
+    .category-nav button { display: inline-flex; align-items: center; gap: 5px; padding: 8px 11px; border-radius: 9px; background: #f6f3f1; font-size: 10px; }
+    .content { padding: 5px 14px 26px; background: #fff; }
+    .group { padding-top: 13px; }
+    .group h2 { position: relative; margin-bottom: 10px; font-size: 16px; }
+    .group h2::after { position: absolute; bottom: -5px; left: 0; width: 28px; height: 3px; border-radius: 3px; background: var(--accent); content: ""; }
+    .product { grid-template-columns: minmax(0, 1fr) 150px; gap: 10px; height: 120px; min-height: 120px; margin: 9px 0; padding: 0; border: 1px solid #eee8e5; border-radius: 9px; overflow: hidden; background: #fff; box-shadow: 0 3px 8px rgb(55 25 15 / .08); }
+    .product-copy { justify-content: center; overflow: hidden; padding: 11px 0 10px 11px; }
+    .product h3 { font-size: 12px; }
+    .product p { font-size: 10px; -webkit-line-clamp: 2; }
+    .price { margin-top: 8px; padding-top: 0; font-size: 12px; }
+    .product-media { align-self: center; width: 150px; height: 120px; min-width: 150px; max-width: 150px; }
+    .product-media img { display: block; width: 150px; height: 120px; border-radius: 0; object-fit: cover; }
+    .add { right: 7px; bottom: 7px; width: 31px; height: 31px; border-color: #fff; background: color-mix(in srgb, var(--accent) 92%, #7e1d0b); }
+    .cart-bar { right: max(14px, calc((100vw - 430px) / 2 + 14px)); bottom: calc(12px + env(safe-area-inset-bottom)); width: 56px; height: 56px; border-radius: 50%; padding: 0; background: var(--accent); box-shadow: 0 8px 19px rgb(126 29 11 / .34); }
+    .cart-bar .lni { font-size: 26px; line-height: 1; }
+    .cart-count { top: -4px; right: -4px; }
+    @media (max-width: 340px) { .restaurant-information { grid-template-columns: 1fr; } }
+    .product-detail-page { --detail-accent: var(--accent); position: fixed; z-index: 90; inset: 0; display: flex; align-items: end; justify-content: center; overflow: hidden; background: rgb(0 0 0 / .52); }
+    .product-detail-page[hidden] { display: none; }
+    .product-detail-shell { position: relative; width: min(100%, 430px); max-height: calc(100dvh - 132px); overflow-y: auto; border-radius: 22px 22px 0 0; padding-bottom: env(safe-area-inset-bottom); background: #fff; box-shadow: 0 -12px 32px rgb(0 0 0 / .24); }
+    .product-detail-shell::before { position: sticky; z-index: 3; top: 8px; display: block; width: 38px; height: 4px; margin: 8px auto -12px; border-radius: 4px; background: #e8e2df; content: ""; }
+    .product-detail-media { position: relative; height: 136px; min-height: 136px; background: #ddd; }
+    .product-detail-media img { width: 100%; height: 100%; object-fit: cover; }
+    .product-detail-close { position: absolute; top: 10px; right: 14px; display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; color: #2e2a28; background: rgb(255 255 255 / .96); box-shadow: 0 2px 9px rgb(0 0 0 / .16); }
+    .product-detail-close svg { width: 20px; height: 20px; }
+    .product-detail-content { position: relative; margin-top: -14px; border-radius: 18px 18px 0 0; padding: 17px 20px 14px; background: #fff; }
+    .product-detail-content h2 { margin: 0 0 5px; font-family: Georgia, serif; font-size: 21px; line-height: 1.1; letter-spacing: -.02em; text-wrap: balance; }
+    .product-detail-description { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; text-wrap: pretty; }
+    .product-detail-base { margin: 12px 0 17px; color: var(--muted); font-size: 11px; }
+    .product-detail-base strong { color: var(--detail-accent); font-size: 14px; }
+    .detail-addons { display: grid; min-width: 0; margin: 0; border: 0; padding: 0; }
+    .detail-addons + .detail-addons { margin-top: 18px; }
+    .detail-addons legend { display: flex; align-items: center; gap: 7px; width: 100%; margin: 0 0 9px; padding: 0; font-size: 12px; font-weight: 800; line-height: 1.2; }
+    .detail-optional { display: inline-flex; align-items: center; min-height: 17px; border-radius: 5px; padding: 2px 5px; color: var(--muted); background: #eee9e6; font-size: 8px; font-weight: 700; line-height: 1; white-space: nowrap; }
+    .detail-addon-list { display: grid; gap: 7px; min-width: 0; }
+    .detail-addon { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: center; gap: 8px; width: 100%; min-height: 40px; border: 1px solid #e7e0dc; border-radius: 8px; padding: 8px 9px; background: #fff; color: var(--ink); font-size: 10px; font-weight: 700; line-height: 1.3; cursor: pointer; }
+    .detail-addon:has(input:checked) { border-color: var(--detail-accent); background: color-mix(in srgb, var(--detail-accent) 4%, white); }
+    .detail-addon input { display: block; justify-self: center; width: 15px; height: 15px; margin: 0; accent-color: var(--detail-accent); }
+    .detail-addon > span:nth-child(2) { min-width: 0; }
+    .detail-addon-price { color: var(--detail-accent); font-size: 10px; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+    .detail-note { display: grid; gap: 6px; min-width: 0; margin-top: 20px; font-size: 11px; font-weight: 800; line-height: 1.2; }
+    .detail-note textarea { display: block; width: 100%; min-height: 58px; resize: vertical; border: 1px solid #ddd; border-radius: 8px; padding: 9px; color: var(--ink); font: inherit; font-size: 10px; font-weight: 400; line-height: 1.4; }
+    .detail-note small { display: block; color: var(--muted); font-size: 8px; text-align: right; font-weight: 400; line-height: 1; }
+    .detail-quantity { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 24px; }
+    .detail-quantity button { display: grid; place-items: center; width: 29px; height: 29px; border: 1px solid #eee8e5; border-radius: 50%; background: #fff; color: var(--accent); font-size: 20px; line-height: 1; box-shadow: 0 1px 3px rgb(0 0 0 / .04); }
+    .detail-quantity button:disabled { color: #bdb7b3; cursor: not-allowed; }
+    .detail-quantity output { min-width: 15px; color: var(--ink); font-size: 12px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+    .product-detail-footer { position: sticky; z-index: 2; bottom: 0; display: flex; justify-content: center; padding: 10px 14px calc(12px + env(safe-area-inset-bottom)); background: #fff; }
+    .detail-add-button { display: grid; grid-template-columns: 1fr auto; align-items: center; width: 100%; min-height: 48px; border: 0; border-radius: 24px; padding: 0 20px; background: var(--detail-accent); color: #fff; box-shadow: 0 7px 15px rgb(150 31 20 / .28); font-size: 12px; font-weight: 800; }
+    .detail-add-button strong { padding-left: 16px; border-left: 1px solid rgb(255 255 255 / .22); font-variant-numeric: tabular-nums; }
+    .product-detail-close:focus-visible, .detail-addon:focus-within, .detail-quantity button:focus-visible, .detail-add-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 340px) { .product { grid-template-columns: minmax(0, 1fr) 119px; } .product-media { width: 119px; min-width: 119px; max-width: 119px; } .product-media img { width: 119px; } .cart-bar { width: calc(100vw - 20px); right: 10px; } }
     @media (min-width: 431px) { body { padding-block: 18px; } .mobile-menu { border-radius: 16px; overflow: clip; } }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    .product, .cart-bar, .product-detail-shell, .checkout-shell, .confirmation-main { animation: ui-fade-up var(--motion-base) var(--motion-ease) both; }
+    .product { transition: transform var(--motion-fast) var(--motion-ease), box-shadow var(--motion-fast) var(--motion-ease); }
+    button { transition: transform var(--motion-fast) var(--motion-ease), box-shadow var(--motion-fast) var(--motion-ease), background-color var(--motion-fast) var(--motion-ease); }
+    button:active:not(:disabled) { transform: scale(.97); }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .skeleton { background: linear-gradient(90deg, #ece7e4 25%, #f8f6f5 37%, #ece7e4 63%); background-size: 400% 100%; animation: ui-shimmer 1.2s ease-in-out infinite; }
+    .empty, #form-message[role="alert"] { animation: ui-fade-up var(--motion-base) var(--motion-ease) both; }
+    @keyframes ui-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes ui-shimmer { to { background-position: -135% 0; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
   </style>
 </head>
 <body>
   <main class="mobile-menu" id="mobile-menu">
     <header class="hero">
       <img id="restaurant-banner" alt="">
-      <button class="round-button back" type="button" aria-label="Voltar" onclick="history.back()">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m15 18-6-6 6-6"/></svg>
-      </button>
       <button class="round-button share" id="share" type="button" aria-label="Compartilhar cardápio">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 8a3 3 0 1 0-2.8-4A3 3 0 0 0 18 8ZM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM8.7 10.6l6.6-3.2m-6.6 6 6.6 3.2"/></svg>
       </button>
+      <output class="share-feedback" id="share-feedback" aria-live="polite" hidden></output>
     </header>
     <section class="restaurant">
       <h1 id="restaurant-name">Carregando cardápio...</h1>
-      <p class="status"><span class="status-dot"></span><strong>Aberto agora</strong><span>•</span><span>Fecha às 23:00</span></p>
-      <div class="delivery">
-        <div>Entrega<strong>30–45 min</strong></div>
-        <div>Taxa<strong class="free">Grátis</strong></div>
-      </div>
+      <p id="restaurant-description" class="restaurant-description" hidden></p>
+      <p class="status" id="restaurant-status" hidden><span class="status-dot"></span><strong id="restaurant-status-label"></strong><span>•</span><span id="restaurant-status-time"></span></p>
+      <section class="restaurant-information" id="restaurant-information" aria-label="Informações do restaurante" hidden>
+        <div class="restaurant-info-card" id="restaurant-delivery" hidden><i class="restaurant-info-icon lni lni-bike" aria-hidden="true"></i><div class="restaurant-info-copy"><span class="restaurant-info-label">Entrega</span><strong class="restaurant-info-value" id="restaurant-delivery-estimate"></strong></div></div>
+        <div class="restaurant-info-card" id="restaurant-delivery-fee-card" hidden><i class="restaurant-info-icon lni lni-dollar" aria-hidden="true"></i><div class="restaurant-info-copy"><span class="restaurant-info-label">Taxa</span><strong class="restaurant-info-value" id="restaurant-delivery-fee"></strong></div></div>
+        <div class="restaurant-information-dynamic" id="restaurant-information-dynamic"></div>
+      </section>
     </section>
     <nav class="category-nav" id="category-nav" aria-label="Categorias"></nav>
     <section class="content" id="products" aria-live="polite">
@@ -166,9 +299,26 @@
     </section>
   </main>
 
+  <section class="product-detail-page" id="product-detail" aria-labelledby="product-detail-name" aria-modal="true" role="dialog" hidden>
+    <div class="product-detail-shell">
+      <div class="product-detail-media"><img id="product-detail-image" alt=""><button class="product-detail-close" id="close-product-detail" type="button" aria-label="Fechar detalhes do produto"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <div class="product-detail-content">
+        <h2 id="product-detail-name"></h2>
+        <p class="product-detail-description" id="product-detail-description"></p>
+        <p class="product-detail-base">A partir de <strong id="product-detail-base-price"></strong></p>
+        <fieldset class="detail-addons" id="product-detail-variants" hidden><legend>Escolha o tamanho <span class="detail-optional">Obrigatório</span></legend><div class="detail-addon-list" id="product-detail-variant-list"></div></fieldset>
+        <fieldset class="detail-addons" id="product-detail-addons" hidden><legend>Adicionais <span class="detail-optional">Opcional</span></legend><div class="detail-addon-list" id="product-detail-addon-list"></div></fieldset>
+        <label class="detail-note">Alguma observação?<textarea id="detail-note" maxlength="500" placeholder="Ex.: retirar cebola, cortar em 8 pedaços"></textarea><small><span id="detail-note-count">0</span>/500</small></label>
+        <div class="detail-quantity" aria-label="Quantidade"><button id="detail-quantity-decrease" type="button" aria-label="Diminuir quantidade">−</button><output id="detail-quantity" aria-live="polite">1</output><button id="detail-quantity-increase" type="button" aria-label="Aumentar quantidade">+</button></div>
+      </div>
+      <footer class="product-detail-footer"><button class="detail-add-button" id="detail-add" type="button"><span>Adicionar</span><strong id="detail-total" aria-live="polite">R$ 0,00</strong></button></footer>
+    </div>
+  </section>
+
+  <button class="tracking-bar" id="track-order-fab" type="button" aria-label="Acompanhar pedido"><i class="lni lni-search-1" aria-hidden="true"></i>Acompanhar</button>
   <button class="cart-bar" id="cart-bar" type="button" hidden aria-label="Ver sacola">
-    <span class="cart-count" id="cart-count">0</span>
-    <svg viewBox="0 0 64 64" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6" d="M8 12h8l8 29h25l7-21H20M27 51a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm20 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
+    <i class="lni lni-basket-shopping-3" aria-hidden="true"></i>
+    <span class="cart-count" id="cart-count" aria-hidden="true">0</span>
   </button>
 
   <section class="checkout-page" id="cart-dialog" aria-labelledby="cart-title" hidden>
@@ -263,20 +413,16 @@
         <p>Seu pedido <strong id="confirmation-number"></strong> foi recebido e já está na fila.</p>
       </section>
 
-      <section class="confirmation-card" aria-label="Andamento do pedido">
-        <div class="status-line active"><i class="status-dot-order"></i><div><strong>Pedido Recebido</strong><span id="confirmation-time"></span></div></div>
-        <div class="status-line"><i class="status-dot-order"></i><div><strong>Em Preparo</strong><span>Aguardando restaurante</span></div></div>
-        <div class="status-line"><i class="status-dot-order"></i><div><strong>A Caminho</strong><span>Estimativa: 30–45 min</span></div></div>
-      </section>
+      <section class="confirmation-card" aria-label="Acompanhamento do pedido"><h3>Acompanhe as atualizações</h3><p style="margin:0;color:var(--muted);font-size:10px;line-height:1.4">Use o botão abaixo para consultar o andamento atualizado do seu pedido.</p></section>
 
       <h2 style="margin:14px 1px 8px;font-size:13px">Entrega</h2>
       <section class="confirmation-card delivery-info">
         <div class="delivery-row">
-          <span class="delivery-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" d="M12 8v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg></span>
+          <span class="delivery-row-icon"><i class="lni lni-alarm-1" aria-hidden="true"></i></span>
           <div><strong>Tempo Estimado</strong><span>30–45 minutos</span></div>
         </div>
         <div class="delivery-row">
-          <span class="delivery-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg></span>
+          <span class="delivery-row-icon"><i class="lni lni-map-marker-1" aria-hidden="true"></i></span>
           <div><strong>Endereço de Entrega</strong><span id="confirmation-address"></span></div>
         </div>
       </section>
@@ -296,21 +442,141 @@
     </main>
   </section>
 
+  <section class="order-tracking-page" id="order-tracking" aria-labelledby="tracking-title" aria-modal="true" role="dialog" hidden>
+    <div class="order-tracking-shell">
+      <button class="tracking-close" id="close-order-tracking" type="button" aria-label="Fechar acompanhamento">×</button>
+      <h2 id="tracking-title">Acompanhe seu pedido</h2>
+      <p>Informe o número do pedido ou o telefone usado no checkout.</p>
+      <form class="tracking-form" id="tracking-form"><input id="tracking-query" name="query" inputmode="numeric" autocomplete="tel" placeholder="#1234 ou (11) 99999-9999" aria-label="Número do pedido ou telefone" required><button type="submit">Consultar</button></form>
+      <p class="tracking-message" id="tracking-message" role="status" aria-live="polite"></p>
+      <section class="tracking-result" id="tracking-result" aria-live="polite" hidden></section>
+    </div>
+  </section>
+
   <script>
     (() => {
       const apiBase = window.API_BASE_URL || "";
       const slug = document.body.dataset.restaurantSlug || window.location.pathname.match(/^\/cardapio\/([^/]+)/)?.[1];
-      const restaurantApi = `/api/v1/restaurants/${encodeURIComponent(slug || "")}`;
+      const restaurantApi = slug ? `/api/v1/restaurants/${encodeURIComponent(slug)}` : null;
       const fallbackBanner = "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=900&q=84";
       const fallbackProduct = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=82";
-      const state = { restaurant: null, products: [], cart: new Map() };
+      const state = { restaurant: null, products: [], cart: new Map(), detail: { product: null, addonIds: new Set(), variantId: null, note: "", quantity: 1, trigger: null } };
+      const productsRegion = document.querySelector("#products");
+      productsRegion.setAttribute("aria-busy", "true");
+      if (!restaurantApi) {
+        document.querySelector("#products").innerHTML = '<div class="empty"><strong>Restaurante não informado</strong><span>Abra o cardápio pela página de um restaurante.</span></div>';
+        return;
+      }
       const money = value => Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
       const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
       const productId = product => Number(product.id ?? product.product_id);
       const slugify = value => "category-" + String(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      const safeHttpsUrl = value => /^https:\/\//i.test(value || "") ? value : "";
+      const trackingPage = document.querySelector("#order-tracking"), trackingForm = document.querySelector("#tracking-form"), trackingSteps = ["pending", "confirmed", "preparing", "ready", "delivered"], trackingLabels = { pending: "Pedido recebido", confirmed: "Pedido confirmado", preparing: "Em preparo", ready: "Pronto", delivered: "Pedido concluído" };
+      let trackingTrigger = null, latestTrackingOrderId = "";
+
+      function openOrderTracking(trigger) {
+        trackingTrigger = trigger;
+        trackingPage.hidden = false;
+        document.body.style.overflow = "hidden";
+        const input = document.querySelector("#tracking-query");
+        if (!input.value && latestTrackingOrderId) input.value = `#${latestTrackingOrderId}`;
+        requestAnimationFrame(() => input.focus());
+      }
+
+      function closeOrderTracking() {
+        if (trackingPage.hidden) return;
+        trackingPage.hidden = true;
+        if (document.querySelector("#confirmation-page").hidden && document.querySelector("#cart-dialog").hidden) document.body.style.overflow = "";
+        trackingTrigger?.focus();
+      }
+
+      function renderTrackingResult(order) {
+        const result = document.querySelector("#tracking-result"), number = String(order.id).padStart(4, "0"), requestedAt = new Date(order.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+        if (order.status === "cancelled") {
+          result.innerHTML = `<h3>Pedido #${number} cancelado</h3><p>Este pedido foi cancelado.</p><ol class="tracking-timeline"><li class="cancelled">Pedido cancelado</li></ol>`;
+        } else {
+          const activeIndex = trackingSteps.indexOf(order.status);
+          result.innerHTML = `<h3>Pedido #${number}</h3><p>${order.order_type === "delivery" ? "Entrega" : "Atendimento presencial"} · solicitado em ${requestedAt}</p><ol class="tracking-timeline">${trackingSteps.map((step, index) => `<li class="${index <= activeIndex ? "active" : ""}">${trackingLabels[step]}</li>`).join("")}</ol>`;
+        }
+        result.innerHTML += '<button class="tracking-refresh" type="button">Atualizar andamento</button>';
+        result.hidden = false;
+        result.querySelector(".tracking-refresh").addEventListener("click", () => submitTracking());
+      }
+
+      async function submitTracking(event) {
+        event?.preventDefault();
+        const input = document.querySelector("#tracking-query"), message = document.querySelector("#tracking-message"), submit = trackingForm.querySelector("button[type=submit]"), query = input.value.trim();
+        message.textContent = "";
+        document.querySelector("#tracking-result").hidden = true;
+        if (!query) { message.textContent = "Informe o número do pedido ou telefone."; input.focus(); return; }
+        submit.disabled = true;
+        submit.textContent = "Consultando…";
+        try {
+          const response = await fetch(`${apiBase}${restaurantApi}/orders/track?query=${encodeURIComponent(query)}`, { headers: { Accept: "application/json" } });
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.messages?.join(" ") || payload.error || "Não foi possível consultar o pedido.");
+          renderTrackingResult(payload);
+        } catch (error) {
+          message.textContent = error.message || "Não foi possível consultar o pedido.";
+        } finally {
+          submit.disabled = false;
+          submit.textContent = "Consultar";
+        }
+      }
+
+      function renderRestaurantInformation(restaurant) {
+        const info = restaurant.menu_information || {}, visibility = info.visibility || {}, delivery = info.delivery || {}, location = info.location || {}, contact = info.contact || {}, social = info.social || {}, status = restaurant.menu_information_status || {};
+        const statusElement = document.querySelector("#restaurant-status"), deliveryElement = document.querySelector("#restaurant-delivery"), deliveryFeeElement = document.querySelector("#restaurant-delivery-fee-card"), informationElement = document.querySelector("#restaurant-information"), dynamicElement = document.querySelector("#restaurant-information-dynamic");
+        const operatingVisible = visibility.operating && (status.open === true || status.opens_at || status.closes_at);
+        statusElement.hidden = !operatingVisible;
+        if (operatingVisible) { document.querySelector("#restaurant-status-label").textContent = status.open ? "Aberto agora" : "Fechado agora"; document.querySelector("#restaurant-status-time").textContent = status.open ? `Fecha às ${status.closes_at}` : (status.opens_at ? `Abre às ${status.opens_at}` : ""); }
+        const deliveryVisible = visibility.delivery && (delivery.estimate || delivery.fee !== null && delivery.fee !== undefined && delivery.fee !== "");
+        deliveryElement.hidden = !deliveryVisible;
+        deliveryFeeElement.hidden = !(visibility.delivery && delivery.fee !== null && delivery.fee !== undefined && delivery.fee !== "");
+        if (deliveryVisible) document.querySelector("#restaurant-delivery-estimate").textContent = delivery.estimate || "Consulte o prazo";
+        if (!deliveryFeeElement.hidden) { const fee = Number(delivery.fee || 0); const feeElement = document.querySelector("#restaurant-delivery-fee"); feeElement.textContent = fee === 0 ? "Grátis" : money(fee); feeElement.classList.toggle("free", fee === 0); }
+        const entries = [];
+        const card = (icon, label, value) => `<div class="restaurant-info-card"><i class="restaurant-info-icon lni ${icon}" aria-hidden="true"></i><div class="restaurant-info-copy"><span class="restaurant-info-label">${label}</span><strong class="restaurant-info-value">${value}</strong></div></div>`;
+        if (visibility.location && safeHttpsUrl(location.map_url)) entries.push(card("lni-map-marker-1", "Localização", `<a href="${escapeHtml(safeHttpsUrl(location.map_url))}" target="_blank" rel="noopener noreferrer">Ver mapa</a>`));
+        if (visibility.contact && (contact.phone || contact.whatsapp)) entries.push(card("lni-phone", "Contato", `${contact.phone ? `<a href="tel:${escapeHtml(String(contact.phone).replace(/\D/g, ""))}">${escapeHtml(contact.phone)}</a>` : ""}${contact.phone && contact.whatsapp ? " · " : ""}${contact.whatsapp ? `<a href="https://wa.me/${escapeHtml(String(contact.whatsapp).replace(/\D/g, ""))}" target="_blank" rel="noopener noreferrer">WhatsApp</a>` : ""}`));
+        if (visibility.social) { const links = [["Instagram", social.instagram], ["Facebook", social.facebook], ["Site", social.website]].filter(([, url]) => safeHttpsUrl(url)).map(([label, url]) => `<a href="${escapeHtml(safeHttpsUrl(url))}" target="_blank" rel="noopener noreferrer">${label}</a>`); if (links.length) entries.push(card("lni-globe-1", "Redes sociais", links.join(" · "))); }
+        dynamicElement.innerHTML = entries.join(""); informationElement.hidden = deliveryElement.hidden && deliveryFeeElement.hidden && entries.length === 0;
+      }
+
+      function renderRestaurantInformation(restaurant) {
+        const info = restaurant.menu_information || {}, visibility = info.visibility || {}, delivery = info.delivery || {}, location = info.location || {}, contact = info.contact || {}, social = info.social || {}, status = restaurant.menu_information_status || {};
+        const element = document.querySelector("#restaurant-information"), meta = [], actions = [];
+        const item = (html, cls = "") => `<span class="restaurant-meta-item ${cls}">${html}</span>`;
+        if (visibility.operating && (status.open === true || status.opens_at || status.closes_at)) { meta.push(item(`<span class="status-dot"></span><strong>${status.open ? "Aberto agora" : "Fechado agora"}</strong>`, "restaurant-meta-status")); meta.push(item(status.open ? `Fecha às ${escapeHtml(status.closes_at || "")}` : `Abre às ${escapeHtml(status.opens_at || "")}`)); }
+        if (visibility.delivery && delivery.estimate) meta.push(item(`<i class="lni lni-bike" aria-hidden="true"></i><span id="restaurant-delivery-estimate">${escapeHtml(delivery.estimate)}</span>`, "restaurant-delivery"));
+        if (visibility.delivery && delivery.fee !== null && delivery.fee !== undefined && delivery.fee !== "") { const fee = Number(delivery.fee || 0); meta.push(item(`<i class="lni lni-dollar" aria-hidden="true"></i>Taxa ${fee === 0 ? "Grátis" : money(fee)}`, "restaurant-delivery-fee-card")); }
+        const metadata = meta.map((value, index) => `${index ? '<span class="restaurant-information-divider" aria-hidden="true">•</span>' : ""}${value}`).join("");
+        if (visibility.location && safeHttpsUrl(location.map_url)) actions.push(`<a class="restaurant-action restaurant-map" href="${escapeHtml(safeHttpsUrl(location.map_url))}" target="_blank" rel="noopener noreferrer"><i class="lni lni-map-marker-1 restaurant-action-icon" aria-hidden="true"></i>Ver mapa</a>`);
+        if (visibility.contact && (contact.phone || contact.whatsapp)) { const href = contact.whatsapp ? `https://wa.me/${escapeHtml(String(contact.whatsapp).replace(/\D/g, ""))}` : `tel:${escapeHtml(String(contact.phone).replace(/\D/g, ""))}`; actions.push(`<span class="restaurant-action-separator" aria-hidden="true"></span><a class="restaurant-action" href="${href}" ${contact.whatsapp ? 'target="_blank" rel="noopener noreferrer"' : ""}><i class="lni lni-phone restaurant-action-icon" aria-hidden="true"></i>Contato</a>`); }
+        if (visibility.social) { const links = [["Instagram", social.instagram], ["Facebook", social.facebook], ["Site", social.website]].filter(([, url]) => safeHttpsUrl(url)).map(([label, url]) => `<a href="${escapeHtml(safeHttpsUrl(url))}" target="_blank" rel="noopener noreferrer">${label}</a>`); if (links.length) actions.push(`<span class="restaurant-action-separator" aria-hidden="true"></span><span class="restaurant-action">${links.join(" · ")}</span>`); }
+        element.innerHTML = `${metadata ? `<div class="restaurant-meta">${metadata}</div>` : ""}${actions.length ? `<div class="restaurant-actions">${actions.join("")}</div>` : ""}`;
+        element.hidden = !metadata && !actions.length;
+      }
+
+      function renderRestaurantInformation(restaurant) {
+        const info = restaurant.menu_information || {}, visibility = info.visibility || {}, delivery = info.delivery || {}, location = info.location || {}, contact = info.contact || {}, social = info.social || {}, status = restaurant.menu_information_status || {};
+        const element = document.querySelector("#restaurant-information"), meta = [], actions = [];
+        const item = (html, cls = "") => `<span class="restaurant-meta-item ${cls}">${html}</span>`;
+        if (visibility.operating && (status.open === true || status.opens_at || status.closes_at)) { meta.push(item(`<span class="status-dot"></span><strong>${status.open ? "Aberto agora" : "Fechado agora"}</strong>`, "restaurant-meta-status")); meta.push(item(status.open ? `Fecha às ${escapeHtml(status.closes_at || "")}` : `Abre às ${escapeHtml(status.opens_at || "")}`)); }
+        if (visibility.delivery && delivery.estimate) meta.push(item(`<i class="lni lni-bike" aria-hidden="true"></i>${escapeHtml(delivery.estimate)}`, "restaurant-delivery"));
+        if (visibility.delivery && delivery.fee !== null && delivery.fee !== undefined && delivery.fee !== "") { const fee = Number(delivery.fee || 0); meta.push(item(`<i class="lni lni-dollar" aria-hidden="true"></i>Taxa ${fee === 0 ? "Grátis" : money(fee)}`, "restaurant-delivery-fee-card")); }
+        const metadata = meta.map((value, index) => `${index ? '<span class="restaurant-information-divider" aria-hidden="true">•</span>' : ""}${value}`).join("");
+        if (visibility.location && safeHttpsUrl(location.map_url)) actions.push(`<a class="restaurant-action restaurant-map" href="${escapeHtml(safeHttpsUrl(location.map_url))}" target="_blank" rel="noopener noreferrer"><i class="lni lni-map-marker-1 restaurant-action-icon" aria-hidden="true"></i>Ver mapa</a>`);
+        if (visibility.contact && (contact.phone || contact.whatsapp)) { const href = contact.whatsapp ? `https://wa.me/${escapeHtml(String(contact.whatsapp).replace(/\D/g, ""))}` : `tel:${escapeHtml(String(contact.phone).replace(/\D/g, ""))}`; actions.push(`<a class="restaurant-action" href="${href}" ${contact.whatsapp ? 'target="_blank" rel="noopener noreferrer"' : ""}><i class="lni lni-phone restaurant-action-icon" aria-hidden="true"></i>Contato</a>`); }
+        if (visibility.social) { const links = [["Instagram", social.instagram, "lni-instagram"], ["Facebook", social.facebook, "lni-facebook"], ["Site", social.website, "lni-globe-1"]].filter(([, url]) => safeHttpsUrl(url)).map(([label, url, icon]) => `<a href="${escapeHtml(safeHttpsUrl(url))}" target="_blank" rel="noopener noreferrer"><i class="lni ${icon} restaurant-action-icon" aria-hidden="true"></i>${label}</a>`); if (links.length) actions.push(`<span class="restaurant-action">${links.join(" · ")}</span>`); }
+        const actionsMarkup = actions.length ? `<div class="restaurant-actions">${actions.join('<span class="restaurant-action-separator" aria-hidden="true"></span>')}</div>` : "";
+        element.innerHTML = `${metadata ? `<div class="restaurant-meta">${metadata}</div>` : ""}${actionsMarkup}`;
+        element.hidden = !metadata && !actions.length;
+      }
 
       function cartDetails() {
-        const items = [...state.cart].map(([id, quantity]) => ({ product: state.products.find(item => productId(item) === id), quantity })).filter(item => item.product);
+        const items = [...state.cart.values()];
         return { items, count: items.reduce((sum, item) => sum + item.quantity, 0), total: items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0) };
       }
 
@@ -338,26 +604,98 @@
         const bar = document.querySelector("#cart-bar");
         bar.hidden = count === 0;
         document.querySelector("#cart-count").textContent = count;
-        bar.setAttribute("aria-label", `Ver sacola com ${count} ${count === 1 ? "item" : "itens"}, total ${money(total)}`);
+        bar.setAttribute("aria-label", `Ver sacola com ${count} ${count === 1 ? "item" : "itens"}`);
         document.querySelector("#dialog-subtotal").textContent = money(total);
         document.querySelector("#dialog-total").textContent = money(total);
         document.querySelector("#footer-total").textContent = money(total);
-        document.querySelector("#cart-items").innerHTML = items.length ? items.map(({ product, quantity }) => `
+        document.querySelector("#cart-items").innerHTML = items.length ? items.map(({ product, addons = [], quantity }) => `
           <div class="cart-item">
             <img src="${escapeHtml(product.image_url || state.restaurant?.product_placeholder_url || fallbackProduct)}" alt="">
-            <div class="cart-item-copy"><strong>${escapeHtml(product.name)}</strong><span class="cart-item-price">${money(Number(product.price) * quantity)}</span></div>
+            <div class="cart-item-copy"><strong>${escapeHtml(product.name)}</strong>${addons.length ? `<small>+ ${addons.map(addon => escapeHtml(addon.name)).join(', ')}</small>` : ''}<span class="cart-item-price">${money(Number(product.price) * quantity)}</span></div>
             <div class="cart-item-actions"><strong>${quantity}x</strong><button class="remove-item" type="button" data-delete="${productId(product)}" aria-label="Remover ${escapeHtml(product.name)} da sacola"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg></button></div>
           </div>`).join("") : '<div class="empty"><strong>Sua sacola está vazia</strong><span>Adicione um item do cardápio.</span></div>';
+      }
+
+      const detailSheet = document.querySelector("#product-detail");
+      const detailAddonList = document.querySelector("#product-detail-addon-list");
+      const detailAddons = document.querySelector("#product-detail-addons");
+      const detailVariants = document.querySelector("#product-detail-variants");
+      const detailVariantList = document.querySelector("#product-detail-variant-list");
+
+      function activeAddons(product = state.detail.product) {
+        return (product?.addons || []).filter(addon => addon.available !== false);
+      }
+
+      function detailPrice() {
+        const product = state.detail.product;
+        if (!product) return 0;
+        const extras = activeAddons().filter(addon => state.detail.addonIds.has(Number(addon.id)));
+        const variant = (product.variants || []).find(item => Number(item.id) === state.detail.variantId);
+        return (Number(variant?.price || product.price) + extras.reduce((sum, addon) => sum + Number(addon.price), 0)) * state.detail.quantity;
+      }
+
+      function renderProductDetail() {
+        const product = state.detail.product;
+        if (!product) return;
+        const addons = activeAddons(product);
+        const variants = (product.variants || []).filter(variant => variant.available !== false);
+        document.querySelector("#product-detail-image").src = product.image_url || fallbackProduct;
+        document.querySelector("#product-detail-image").alt = product.name;
+        document.querySelector("#product-detail-name").textContent = product.name;
+        document.querySelector("#product-detail-description").textContent = product.description || "Preparado com ingredientes selecionados.";
+        document.querySelector("#product-detail-base-price").textContent = money(product.price);
+        detailAddons.hidden = addons.length === 0;
+        detailVariants.hidden = variants.length === 0;
+        detailVariantList.innerHTML = variants.map(variant => `<label class="detail-addon"><input type="radio" name="detail-variant" value="${Number(variant.id)}" ${state.detail.variantId === Number(variant.id) ? "checked" : ""}><span>${escapeHtml(variant.name)}</span><span class="detail-addon-price">${money(variant.price)}</span></label>`).join("");
+        detailAddonList.innerHTML = addons.map(addon => `<label class="detail-addon"><input type="checkbox" value="${Number(addon.id)}" ${state.detail.addonIds.has(Number(addon.id)) ? "checked" : ""}><span>${escapeHtml(addon.name)}</span><span class="detail-addon-price">+ ${money(addon.price)}</span></label>`).join("");
+        document.querySelector("#detail-quantity").textContent = state.detail.quantity;
+        document.querySelector("#detail-quantity-decrease").disabled = state.detail.quantity === 1;
+        document.querySelector("#detail-total").textContent = money(detailPrice());
+        document.querySelector("#detail-note").value = state.detail.note;
+        document.querySelector("#detail-note-count").textContent = state.detail.note.length;
+      }
+
+      function openProductDetail(product, trigger) {
+        if (!product) return;
+        state.detail = { product, addonIds: new Set(), variantId: null, note: "", quantity: 1, trigger };
+        renderProductDetail();
+        detailSheet.hidden = false;
+        document.body.style.overflow = "hidden";
+        requestAnimationFrame(() => document.querySelector("#close-product-detail").focus());
+      }
+
+      function closeProductDetail() {
+        if (detailSheet.hidden) return;
+        const trigger = state.detail.trigger;
+        detailSheet.hidden = true;
+        document.body.style.overflow = "";
+        trigger?.focus();
+      }
+
+      function addDetailProduct() {
+        const product = state.detail.product;
+        if (!product) return;
+        const addonIds = [...state.detail.addonIds].sort((a, b) => a - b);
+        const addons = activeAddons(product).filter(addon => addonIds.includes(Number(addon.id)));
+        const variant = (product.variants || []).find(item => Number(item.id) === state.detail.variantId);
+        if ((product.variants || []).some(item => item.available !== false) && !variant) { detailVariants.querySelector("input")?.focus(); return; }
+        const price = Number(variant?.price || product.price) + addons.reduce((sum, addon) => sum + Number(addon.price), 0);
+        const key = `${productId(product)}:${state.detail.variantId || "base"}:${addonIds.join(",")}:${state.detail.note}`;
+        const item = state.cart.get(key) || { product: { ...product, price }, product_id: productId(product), addons, variant, note: state.detail.note, quantity: 0 };
+        item.quantity += state.detail.quantity;
+        state.cart.set(key, item);
+        renderCart();
+        closeProductDetail();
       }
 
       function showOrderConfirmation(order, cart, orderData) {
         const confirmationPage = document.querySelector("#confirmation-page");
         const orderNumber = String(order.id || "").padStart(4, "0");
+        latestTrackingOrderId = order.id || "";
         document.querySelector("#confirmation-number").textContent = `#${orderNumber}`;
-        document.querySelector("#confirmation-time").textContent = new Date(order.created_at || Date.now()).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
         document.querySelector("#confirmation-address").textContent = orderData.delivery_address;
-        document.querySelector("#confirmation-items").innerHTML = cart.items.map(({ product, quantity }) => `
-          <div class="confirmed-item"><b>${quantity}x</b><span>${escapeHtml(product.name)}</span><span>${money(Number(product.price) * quantity)}</span></div>
+        document.querySelector("#confirmation-items").innerHTML = cart.items.map(({ product, addons = [], quantity }) => `
+          <div class="confirmed-item"><b>${quantity}x</b><span>${escapeHtml(product.name)}${addons.length ? ` + ${addons.map(addon => escapeHtml(addon.name)).join(', ')}` : ''}</span><span>${money(Number(product.price) * quantity)}</span></div>
         `).join("");
         document.querySelector("#confirmation-subtotal").textContent = money(cart.total);
         document.querySelector("#confirmation-total").textContent = money(cart.total);
@@ -367,9 +705,11 @@
         document.body.style.overflow = "hidden";
       }
 
-      function changeQuantity(id, amount) {
-        const next = (state.cart.get(id) || 0) + amount;
-        if (next > 0) state.cart.set(id, next); else state.cart.delete(id);
+      function changeQuantity(key, amount) {
+        const item = state.cart.get(key);
+        if (!item) return;
+        item.quantity += amount;
+        if (item.quantity > 0) state.cart.set(key, item); else state.cart.delete(key);
         renderCart();
       }
 
@@ -377,10 +717,11 @@
         const add = event.target.closest("[data-add]");
         const remove = event.target.closest("[data-remove]");
         const deleteItem = event.target.closest("[data-delete]");
-        if (add) changeQuantity(Number(add.dataset.add), 1);
-        if (remove) changeQuantity(Number(remove.dataset.remove), -1);
+        if (add) openProductDetail(state.products.find(product => productId(product) === Number(add.dataset.add)), add);
+        if (remove) changeQuantity(remove.dataset.remove, -1);
         if (deleteItem) {
-          state.cart.delete(Number(deleteItem.dataset.delete));
+          const key = [...state.cart.keys()].find(itemKey => itemKey === String(deleteItem.dataset.delete) || itemKey.startsWith(`${deleteItem.dataset.delete}:`));
+          if (key) state.cart.delete(key);
           renderCart();
         }
         const target = event.target.closest("[data-target]");
@@ -389,6 +730,23 @@
           document.getElementById(target.dataset.target)?.scrollIntoView({ behavior: "smooth" });
         }
       });
+      detailAddonList.addEventListener("change", event => {
+        const input = event.target.closest("input[type=checkbox]");
+        if (!input) return;
+        const id = Number(input.value);
+        if (input.checked) state.detail.addonIds.add(id); else state.detail.addonIds.delete(id);
+        document.querySelector("#detail-total").textContent = money(detailPrice());
+      });
+      detailVariantList.addEventListener("change", event => { state.detail.variantId = Number(event.target.value); renderProductDetail(); });
+      document.querySelector("#detail-note").addEventListener("input", event => { state.detail.note = event.target.value; document.querySelector("#detail-note-count").textContent = state.detail.note.length; });
+      document.querySelector("#detail-quantity-decrease").addEventListener("click", () => { state.detail.quantity = Math.max(1, state.detail.quantity - 1); renderProductDetail(); });
+      document.querySelector("#detail-quantity-increase").addEventListener("click", () => { state.detail.quantity += 1; renderProductDetail(); });
+      document.querySelector("#detail-add").addEventListener("click", addDetailProduct);
+      document.querySelector("#close-product-detail").addEventListener("click", closeProductDetail);
+      document.querySelector("#track-order-fab").addEventListener("click", event => openOrderTracking(event.currentTarget));
+      document.querySelector("#close-order-tracking").addEventListener("click", closeOrderTracking);
+      trackingForm.addEventListener("submit", submitTracking);
+      document.addEventListener("keydown", event => { if (event.key === "Escape" && !detailSheet.hidden) closeProductDetail(); if (event.key === "Escape" && !trackingPage.hidden) closeOrderTracking(); });
       const checkoutPage = document.querySelector("#cart-dialog");
       document.querySelector("#cart-bar").addEventListener("click", () => {
         checkoutPage.hidden = false;
@@ -410,13 +768,59 @@
         document.body.style.overflow = "";
         window.scrollTo(0, 0);
       }));
-      document.querySelector("#track-order").addEventListener("click", () => {
-        confirmationPage.scrollTop = 0;
-        document.querySelector(".status-line.active").focus?.();
-      });
-      document.querySelector("#share").addEventListener("click", async () => {
-        if (navigator.share) await navigator.share({ title: document.title, url: location.href });
-        else await navigator.clipboard?.writeText(location.href);
+      document.querySelector("#track-order").addEventListener("click", event => openOrderTracking(event.currentTarget));
+      const shareButton = document.querySelector("#share");
+      const shareFeedback = document.querySelector("#share-feedback");
+      let shareFeedbackTimeout;
+
+      function showShareFeedback(message) {
+        clearTimeout(shareFeedbackTimeout);
+        shareFeedback.textContent = message;
+        shareFeedback.hidden = false;
+        shareFeedbackTimeout = setTimeout(() => { shareFeedback.hidden = true; }, 3200);
+      }
+
+      async function copyMenuLink(url) {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(url);
+          return;
+        }
+
+        const temporaryInput = document.createElement("textarea");
+        temporaryInput.value = url;
+        temporaryInput.setAttribute("readonly", "");
+        temporaryInput.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+        document.body.appendChild(temporaryInput);
+        temporaryInput.select();
+        const copied = document.execCommand("copy");
+        temporaryInput.remove();
+        if (!copied) throw new Error("Não foi possível copiar o link.");
+      }
+
+      shareButton.addEventListener("click", async () => {
+        const restaurantName = document.querySelector("#restaurant-name").textContent || "este restaurante";
+        const url = location.href;
+        const shareData = { title: document.title, text: `Confira o cardápio de ${restaurantName}.`, url };
+
+        try {
+          if (navigator.share) {
+            await navigator.share(shareData);
+            showShareFeedback("Cardápio compartilhado.");
+            return;
+          }
+
+          await copyMenuLink(url);
+          showShareFeedback("Link do cardápio copiado.");
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+
+          try {
+            await copyMenuLink(url);
+            showShareFeedback("Link do cardápio copiado.");
+          } catch {
+            showShareFeedback("Não foi possível compartilhar agora.");
+          }
+        }
       });
 
       document.querySelector("#checkout").addEventListener("submit", async event => {
@@ -427,7 +831,7 @@
         const data = Object.fromEntries(new FormData(form));
         if (data.order_type === "delivery" && !data.delivery_address.trim()) { message.textContent = "Informe o endereço de entrega."; return; }
         const orderCart = cartDetails();
-        const items = orderCart.items.map(({ product, quantity }) => ({ product_id: productId(product), quantity }));
+        const items = orderCart.items.map(({ product, product_id, addons, variant, note, quantity }) => ({ product_id: product_id || productId(product), quantity, variant_id: variant?.id, note, addon_ids: (addons || []).map(addon => addon.id) }));
         submit.disabled = true;
         message.textContent = "";
         try {
@@ -448,6 +852,28 @@
         }
       });
 
+      const FONT_MAP = {
+        'inter': { css: "'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap' },
+        'roboto': { css: "'Roboto', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", url: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap' },
+        'montserrat': { css: "'Montserrat', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap' },
+        'poppins': { css: "'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", url: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap' },
+        'playfair-display': { css: "'Playfair Display', Georgia, serif", url: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap' },
+        'open-sans': { css: "'Open Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", url: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap' }
+      };
+
+      const loadGoogleFont = (fontKey) => {
+        const config = FONT_MAP[fontKey] || FONT_MAP['inter'];
+        const linkId = `google-font-${fontKey}`;
+        if (!document.getElementById(linkId) && config.url) {
+          const link = document.createElement('link');
+          link.id = linkId;
+          link.rel = 'stylesheet';
+          link.href = config.url;
+          document.head.appendChild(link);
+        }
+        document.documentElement.style.setProperty('--font-family', config.css);
+      };
+
       Promise.all([
         fetch(apiBase + restaurantApi, { headers: { Accept: "application/json" } }).then(response => response.ok ? response.json() : Promise.reject(new Error("Não foi possível carregar o restaurante."))),
         fetch(apiBase + restaurantApi + "/products", { headers: { Accept: "application/json" } }).then(response => response.ok ? response.json() : Promise.reject(new Error("Não foi possível carregar o cardápio.")))
@@ -455,13 +881,19 @@
         state.restaurant = restaurant;
         state.products = products.filter(product => product.available !== false);
         document.documentElement.style.setProperty("--accent", restaurant.primary_color || "#b52b05");
+        loadGoogleFont(restaurant.font_family || 'inter');
         document.querySelector("#restaurant-name").textContent = restaurant.name || "Restaurante";
+        const description = document.querySelector("#restaurant-description");
+        if (description) { description.textContent = restaurant.menu_description || ""; description.hidden = !description.textContent; }
         const banner = document.querySelector("#restaurant-banner");
         banner.src = restaurant.banner_url || fallbackBanner;
         banner.alt = `Ambiente do restaurante ${restaurant.name || ""}`;
         document.title = `${restaurant.name || "Restaurante"} — Cardápio`;
+        renderRestaurantInformation(restaurant);
         renderProducts();
+        productsRegion.removeAttribute("aria-busy");
       }).catch(error => {
+        productsRegion.removeAttribute("aria-busy");
         document.querySelector("#products").innerHTML = `<div class="empty"><strong>Não foi possível carregar</strong><span>${escapeHtml(error.message)}</span></div>`;
       });
     })();
