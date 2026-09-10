@@ -100,8 +100,10 @@ services:
 
 networks:
   private:
+    name: pedeai_overlay_net
     driver: overlay
     attachable: true
+
 
 volumes:
   postgres_data:
