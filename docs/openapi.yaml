@@ -4,7 +4,10 @@ info:
   version: 1.1.0
   description: API multi-restaurante. Recursos operacionais são sempre isolados pelo `restaurant_slug` da rota.
 servers:
+  - url: https://pedeai.insilico.cloud
+    description: Production
   - url: http://localhost:3000
+    description: Local development
 tags:
   - { name: Authentication }
   - { name: Restaurants }

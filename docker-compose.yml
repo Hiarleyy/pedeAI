@@ -1,35 +1,101 @@
 services:
-  db:
-    image: postgres:16-alpine
+  web:
+    image: ${PEDEAI_IMAGE:-hiarley/pedeai:latest}
+    command: ["web"]
     environment:
-      POSTGRES_DB: pedeai_development
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports: ["5432:5432"]
-    volumes: ["postgres_data:/var/lib/postgresql/data"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    restart: unless-stopped
-  api:
-    build: .
-    command: bash -lc "rm -f tmp/pids/server.pid && bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0"
-    volumes: [".:/app"]
-    ports: ["3000:3000"]
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/pedeai_development
-      RAILS_ENV: development
-    restart: unless-stopped
+      RAILS_ENV: production
+      BUNDLE_WITHOUT: development:test
+      PORT: "3000"
+      APP_HOST: pedeai.insilico.cloud
+      CORS_ORIGINS: https://pedeai.insilico.cloud
+      RAILS_ASSUME_SSL: "true"
+      RAILS_FORCE_SSL: "true"
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
+      DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-pedeai_production}
+      REDIS_URL: redis://redis:6379/0
+    expose: ["3000"]
+    networks: [internal, web]
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:3000/up || exit 1"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 5
       start_period: 30s
-    depends_on:
-      - db
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=plataforma-redacao-web"
+        - "traefik.http.routers.pedeai.rule=Host(`pedeai.insilico.cloud`)"
+        - "traefik.http.routers.pedeai.entrypoints=websecure"
+        - "traefik.http.routers.pedeai.tls=true"
+        - "traefik.http.routers.pedeai.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.pedeai.service=pedeai-service"
+        - "traefik.http.services.pedeai-service.loadbalancer.server.port=3000"
+
+  worker:
+    image: ${PEDEAI_IMAGE:-hiarley/pedeai:latest}
+    command: ["worker"]
+    environment: &app-environment
+      RAILS_ENV: production
+      BUNDLE_WITHOUT: development:test
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
+      DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-pedeai_production}
+      REDIS_URL: redis://redis:6379/0
+    networks: [internal]
+    deploy:
+      replicas: 1
+
+  migrate:
+    image: ${PEDEAI_IMAGE:-hiarley/pedeai:latest}
+    command: ["migrate"]
+    environment: *app-environment
+    networks: [internal]
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pedeai_production}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      replicas: 1
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis_data:/data]
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      replicas: 1
 
 volumes:
   postgres_data:
+    name: pedeai_postgres_data
+  redis_data:
+    name: pedeai_redis_data
+
+networks:
+  web:
+    name: plataforma-redacao-web
+    external: true
+  internal:
+    name: pedeai-internal
+    driver: overlay
+    attachable: true

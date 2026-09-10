@@ -6,12 +6,18 @@ services:
       RAILS_ENV: production
       BUNDLE_WITHOUT: development:test
       PORT: "3000"
+      APP_HOST: ${APP_HOST:-pedeai.insilico.cloud}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://pedeai.insilico.cloud}
+      RAILS_ASSUME_SSL: ${RAILS_ASSUME_SSL:-true}
+      RAILS_FORCE_SSL: ${RAILS_FORCE_SSL:-true}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
       DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:?POSTGRES_DB is required}
       REDIS_URL: redis://redis:6379/0
-    ports:
-      - "${HTTP_PORT:-3000}:3000"
-    networks: [private]
+    expose:
+      - "3000"
+    networks:
+      - private
+      - traefik_public
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:3000/up || exit 1"]
@@ -22,6 +28,46 @@ services:
     depends_on:
       - db
       - redis
+    # Mantidas também no container para compatibilidade com o provider Docker.
+    # Em Swarm, o Traefik lê as mesmas labels em deploy.labels abaixo.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=plataforma-redacao-web"
+      - "traefik.http.routers.pedeai-http.rule=Host(`pedeai.insilico.cloud`)"
+      - "traefik.http.routers.pedeai-http.entrypoints=web"
+      - "traefik.http.routers.pedeai-http.middlewares=pedeai-redirect-https"
+      - "traefik.http.middlewares.pedeai-redirect-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.pedeai.rule=Host(`pedeai.insilico.cloud`)"
+      - "traefik.http.routers.pedeai.entrypoints=websecure"
+      - "traefik.http.routers.pedeai.tls=true"
+      - "traefik.http.routers.pedeai.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.pedeai.service=pedeai-service"
+      - "traefik.http.routers.pedeai.middlewares=pedeai-security-headers"
+      - "traefik.http.middlewares.pedeai-security-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.pedeai-security-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.pedeai-security-headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.pedeai-security-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.services.pedeai-service.loadbalancer.server.port=3000"
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=plataforma-redacao-web"
+        - "traefik.http.routers.pedeai-http.rule=Host(`pedeai.insilico.cloud`)"
+        - "traefik.http.routers.pedeai-http.entrypoints=web"
+        - "traefik.http.routers.pedeai-http.middlewares=pedeai-redirect-https"
+        - "traefik.http.middlewares.pedeai-redirect-https.redirectscheme.scheme=https"
+        - "traefik.http.routers.pedeai.rule=Host(`pedeai.insilico.cloud`)"
+        - "traefik.http.routers.pedeai.entrypoints=websecure"
+        - "traefik.http.routers.pedeai.tls=true"
+        - "traefik.http.routers.pedeai.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.pedeai.service=pedeai-service"
+        - "traefik.http.routers.pedeai.middlewares=pedeai-security-headers"
+        - "traefik.http.middlewares.pedeai-security-headers.headers.stsSeconds=31536000"
+        - "traefik.http.middlewares.pedeai-security-headers.headers.stsIncludeSubdomains=true"
+        - "traefik.http.middlewares.pedeai-security-headers.headers.stsPreload=true"
+        - "traefik.http.middlewares.pedeai-security-headers.headers.contentTypeNosniff=true"
+        - "traefik.http.services.pedeai-service.loadbalancer.server.port=3000"
 
     logging: &default-logging
       driver: json-file
@@ -44,6 +90,8 @@ services:
     depends_on:
       - db
       - redis
+    deploy:
+      replicas: 1
 
     logging: *default-logging
 
@@ -59,6 +107,7 @@ services:
     networks: [private]
     restart: "no"
     deploy:
+      replicas: 1
       restart_policy:
         condition: none
 
@@ -83,6 +132,8 @@ services:
       timeout: 5s
       retries: 5
     logging: *default-logging
+    deploy:
+      replicas: 1
 
   redis:
     image: redis:7-alpine
@@ -97,12 +148,17 @@ services:
       timeout: 5s
       retries: 5
     logging: *default-logging
+    deploy:
+      replicas: 1
 
 networks:
   private:
-    name: pedeai_overlay_net
+    name: pedeai-internal
     driver: overlay
     attachable: true
+  traefik_public:
+    external: true
+    name: ${TRAEFIK_NETWORK:-plataforma-redacao-web}
 
 
 volumes:

@@ -76,3 +76,5 @@ puts "Forno & Massa: /cardapio/forno-e-massa e /admin/forno-e-massa"
 puts "  SuperAdmin: superadmin@forno-e-massa.pedeai.test / admin123"
 puts "Casa do Sabor: /cardapio/casa-do-sabor e /admin/casa-do-sabor"
 puts "  SuperAdmin: superadmin@casa-do-sabor.pedeai.test / admin123"
+
+load Rails.root.join("db/seeds/test_burger_restaurant.rb")
