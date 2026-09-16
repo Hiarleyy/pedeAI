@@ -3,5 +3,9 @@
 # Mark the database schema as having been generated.
 db/schema.rb linguist-generated
 
+# Linux container entrypoints must retain LF line endings regardless of the
+# developer workstation's Git settings.
+bin/pedeai-entrypoint text eol=lf
+
 # Mark any vendored files as having been vendored.
 vendor/* linguist-vendored
