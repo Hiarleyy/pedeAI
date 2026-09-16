@@ -279,6 +279,7 @@
     @keyframes ui-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes ui-shimmer { to { background-position: -135% 0; } }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+    .suspension-bar { display: flex; align-items: center; gap: 10px; margin: 0 14px 8px; border-radius: 10px; padding: 11px 13px; background: #7c1a10; color: #fff; font-size: 11px; font-weight: 700; line-height: 1.4; } .suspension-bar[hidden] { display: none; } .suspension-bar i { font-size: 16px; flex: 0 0 auto; }
   </style>
 </head>
 <body>
@@ -300,6 +301,7 @@
         <div class="restaurant-information-dynamic" id="restaurant-information-dynamic"></div>
       </section>
     </section>
+    <div class="suspension-bar" id="suspension-bar" role="alert" aria-live="polite" hidden><i class="lni lni-warning-1" aria-hidden="true"></i><span>Esta loja está temporariamente indisponível. Não é possível realizar pedidos no momento.</span></div>
     <nav class="category-nav" id="category-nav" aria-label="Categorias"></nav>
     <section class="content" id="products" aria-live="polite">
       <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
@@ -498,10 +500,21 @@
       const slugify = value => "category-" + String(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       const safeHttpsUrl = value => /^https:\/\//i.test(value || "") ? value : "";
       const isRestaurantOpen = () => state.restaurant?.menu_information_status?.open === true;
+      const isRestaurantSuspended = () => state.restaurant?.status === "suspended";
       const closedMessage = () => {
         const nextOpening = state.restaurant?.menu_information_status?.opens_at;
         return nextOpening ? `Restaurante fechado. Abre às ${nextOpening}.` : "Restaurante fechado no momento.";
       };
+      const suspendedMessage = () => "Esta loja está temporariamente indisponível. Não é possível realizar pedidos no momento.";
+      function updateSuspensionBar() {
+        const bar = document.querySelector("#suspension-bar"), suspended = isRestaurantSuspended();
+        if (bar) bar.hidden = !suspended;
+        document.querySelectorAll(".add").forEach(btn => {
+          btn.disabled = suspended;
+          btn.setAttribute("aria-disabled", String(suspended));
+          if (suspended) btn.setAttribute("title", suspendedMessage()); else btn.removeAttribute("title");
+        });
+      }
       function showRestaurantClosedModal() {
         const modal = document.querySelector("#restaurant-closed-modal");
         document.querySelector("#restaurant-closed-message").textContent = closedMessage();
@@ -644,6 +657,7 @@
                 <div class="product-media"><img src="${escapeHtml(product.image_url || productImageFallback())}" alt="${escapeHtml(product.name)}" loading="lazy"><button class="add" type="button" data-add="${productId(product)}" aria-label="Adicionar ${escapeHtml(product.name)}">+</button></div>
               </article>`).join("")}
           </section>`).join("") || '<div class="empty"><strong>Cardápio indisponível</strong><span>Tente novamente em alguns instantes.</span></div>';
+        updateSuspensionBar();
       }
 
       function renderCart() {
@@ -651,8 +665,8 @@
         const bar = document.querySelector("#cart-bar");
         bar.hidden = count === 0;
         bar.disabled = false;
-        bar.setAttribute("aria-disabled", String(!isRestaurantOpen()));
-        bar.title = isRestaurantOpen() ? "" : closedMessage();
+        bar.setAttribute("aria-disabled", String(isRestaurantSuspended() || !isRestaurantOpen()));
+        bar.title = isRestaurantSuspended() ? suspendedMessage() : isRestaurantOpen() ? "" : closedMessage();
         document.querySelector("#cart-count").textContent = count;
         bar.setAttribute("aria-label", `Ver sacola com ${count} ${count === 1 ? "item" : "itens"}`);
         document.querySelector("#dialog-subtotal").textContent = money(total);
@@ -666,9 +680,10 @@
           </div>`).join("") : '<div class="empty"><strong>Sua sacola está vazia</strong><span>Adicione um item do cardápio.</span></div>';
         const submit = document.querySelector("#checkout .submit");
         const message = document.querySelector("#form-message");
-        submit.disabled = count === 0;
-        submit.setAttribute("aria-disabled", String(!isRestaurantOpen()));
-        if (!isRestaurantOpen()) message.textContent = closedMessage();
+        submit.disabled = count === 0 || isRestaurantSuspended();
+        submit.setAttribute("aria-disabled", String(isRestaurantSuspended() || !isRestaurantOpen()));
+        if (isRestaurantSuspended()) message.textContent = suspendedMessage();
+        else if (!isRestaurantOpen()) message.textContent = closedMessage();
       }
 
       const detailSheet = document.querySelector("#product-detail");
@@ -712,6 +727,7 @@
 
       function openProductDetail(product, trigger) {
         if (!product) return;
+        if (isRestaurantSuspended()) { showToast(suspendedMessage()); return; }
         state.detail = { product, addonIds: new Set(), variantId: null, note: "", quantity: 1, trigger };
         renderProductDetail();
         detailSheet.hidden = false;
@@ -730,6 +746,7 @@
       function addDetailProduct() {
         const product = state.detail.product;
         if (!product) return;
+        if (isRestaurantSuspended()) { closeProductDetail(); return; }
         const addonIds = [...state.detail.addonIds].sort((a, b) => a - b);
         const addons = activeAddons(product).filter(addon => addonIds.includes(Number(addon.id)));
         const variant = (product.variants || []).find(item => Number(item.id) === state.detail.variantId);
@@ -807,6 +824,7 @@
       document.addEventListener("keydown", event => { if (event.key === "Escape" && !detailSheet.hidden) closeProductDetail(); if (event.key === "Escape" && !trackingPage.hidden) closeOrderTracking(); if (event.key === "Escape") closeRestaurantClosedModal(); });
       const checkoutPage = document.querySelector("#cart-dialog");
       document.querySelector("#cart-bar").addEventListener("click", () => {
+        if (isRestaurantSuspended()) { const bar = document.querySelector("#suspension-bar"); bar?.scrollIntoView({ behavior: "smooth", block: "nearest" }); return; }
         if (!isRestaurantOpen()) { showRestaurantClosedModal(); return; }
         checkoutPage.hidden = false;
         document.body.style.overflow = "hidden";
@@ -887,6 +905,7 @@
         const form = event.currentTarget;
         const message = document.querySelector("#form-message");
         const submit = form.querySelector(".submit");
+        if (isRestaurantSuspended()) { message.textContent = suspendedMessage(); return; }
         if (!isRestaurantOpen()) { message.textContent = closedMessage(); showRestaurantClosedModal(); return; }
         const data = Object.fromEntries(new FormData(form));
         if (data.order_type === "delivery" && !data.delivery_address.trim()) { message.textContent = "Informe o endereço de entrega."; return; }
@@ -949,6 +968,7 @@
           state.restaurant = { ...state.restaurant, ...await response.json() };
           renderRestaurantInformation(state.restaurant);
           renderCart();
+          updateSuspensionBar();
         } catch {
           // A falha temporária mantém o último estado conhecido; o backend continua autoritativo.
         }
@@ -972,6 +992,7 @@
         renderRestaurantInformation(restaurant);
         renderProducts();
         renderCart();
+        updateSuspensionBar();
         productsRegion.removeAttribute("aria-busy");
         setInterval(refreshOperatingStatus, 60000);
       }).catch(error => {

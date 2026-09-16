@@ -244,9 +244,32 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
       assert_includes source, "state.cart.clear()"
     end
 
-    assert_includes desktop, 'aria-disabled="${String(!isRestaurantOpen())}"'
-    assert_includes mobile, 'bar.setAttribute("aria-disabled", String(!isRestaurantOpen()))'
-    assert_includes mobile, 'submit.setAttribute("aria-disabled", String(!isRestaurantOpen()))'
+    assert_includes desktop, 'aria-disabled="${String(isRestaurantSuspended()||!isRestaurantOpen())}"'
+    assert_includes mobile, 'bar.setAttribute("aria-disabled", String(isRestaurantSuspended() || !isRestaurantOpen()))'
+    assert_includes mobile, 'submit.setAttribute("aria-disabled", String(isRestaurantSuspended() || !isRestaurantOpen()))'
+  end
+
+  test "cardapios avisam e bloqueiam compras quando restaurante esta suspenso" do
+    desktop = Rails.root.join("docs/menu.html").read
+    mobile = Rails.root.join("docs/menu-mobile.html").read
+
+    [desktop, mobile].each do |source|
+      compact = source.gsub(/\s+/, "")
+      assert_includes source, 'id="suspension-bar"'
+      assert_includes source, 'role="alert"'
+      assert_includes source, 'aria-live="polite"'
+      assert_includes source, "isRestaurantSuspended"
+      assert_includes compact, 'state.restaurant?.status==="suspended"'
+      assert_includes source, "suspendedMessage"
+      assert_includes source, "updateSuspensionBar"
+      assert_includes source, "refreshOperatingStatus"
+      assert_includes compact, "if(isRestaurantSuspended())"
+    end
+
+    assert_includes desktop, 'btn.disabled=suspended'
+    assert_includes desktop, 'details.items.length&&!isRestaurantSuspended()'
+    assert_includes mobile, 'btn.disabled = suspended'
+    assert_includes mobile, 'submit.disabled = count === 0 || isRestaurantSuspended()'
   end
 
   test "clientes e painel explicitam composição de preço personalizado" do
