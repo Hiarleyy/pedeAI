@@ -44,6 +44,18 @@ class Api::V1::OpenapiContractTest < ActiveSupport::TestCase
     assert paths.dig("/api/v1/restaurants/{restaurant_slug}/users", "post", "security")
     assert_nil paths.dig("/api/v1/restaurants/{restaurant_slug}/orders", "post", "security")
     assert paths.dig("/api/internal/restaurants", "post", "security")
+    assert paths.dig("/api/internal/restaurants/{id}", "delete", "security")
+  end
+
+  test "restaurant deletion documents the slug confirmation and guarded responses" do
+    document = YAML.safe_load(Rails.root.join("docs/openapi.yaml").read)
+    operation = document.dig("paths", "/api/internal/restaurants/{id}", "delete")
+
+    assert_equal ["confirmation_slug"], operation.dig("requestBody", "content", "application/json", "schema", "required")
+    assert operation.fetch("responses").key?("204")
+    assert operation.fetch("responses").key?("403")
+    assert operation.fetch("responses").key?("409")
+    assert operation.fetch("responses").key?("422")
   end
 
   test "order creation documents the closed restaurant conflict" do

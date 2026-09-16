@@ -4,7 +4,7 @@ class PlatformUser < ApplicationRecord
 
   ROLES = %w[owner operator support auditor read_only].freeze
   PERMISSIONS = {
-    "owner" => %w[restaurants:read restaurants:create restaurants:update restaurants:lifecycle audits:read diagnostics:read],
+    "owner" => %w[restaurants:read restaurants:create restaurants:update restaurants:lifecycle restaurants:delete audits:read diagnostics:read],
     "operator" => %w[restaurants:read restaurants:create restaurants:update restaurants:lifecycle diagnostics:read],
     "support" => %w[restaurants:read diagnostics:read],
     "auditor" => %w[restaurants:read audits:read diagnostics:read],

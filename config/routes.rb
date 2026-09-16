@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :internal do
       resource :session, only: :create
-      resources :restaurants, only: %i[index show create update] do
+      resources :restaurants, only: %i[index show create update destroy] do
         member do
           post :suspend
           post :reactivate

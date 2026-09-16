@@ -73,6 +73,25 @@ paths:
       tags: [Restaurants]
       security: [{ platformBearerAuth: [] }]
       responses: { '200': { description: Restaurante atualizado } }
+    delete:
+      tags: [Restaurants]
+      summary: Exclui permanentemente um restaurante suspenso após confirmação do slug
+      security: [{ platformBearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [confirmation_slug]
+              properties:
+                confirmation_slug: { type: string, description: Slug exato do restaurante a excluir }
+      responses:
+        '204': { description: Restaurante e dados vinculados removidos permanentemente }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: Restaurante precisa estar suspenso para ser excluído }
+        '422': { $ref: '#/components/responses/ValidationError' }
   /api/internal/restaurants/{id}/suspend:
     post:
       tags: [Restaurants]

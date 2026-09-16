@@ -28,6 +28,13 @@
     signed_id(purpose: :api_auth, expires_in: 24.hours)
   end
 
+  def destroy_from_tenant_cleanup!
+    @tenant_cleanup = true
+    destroy!
+  ensure
+    @tenant_cleanup = false
+  end
+
   private
 
   def super_admin_role_changed?
@@ -40,7 +47,7 @@
   end
 
   def prevent_super_admin_removal
-    return unless super_admin?
+    return unless super_admin? && !@tenant_cleanup
 
     errors.add(:base, "superAdmin do restaurante não pode ser removido")
     throw :abort

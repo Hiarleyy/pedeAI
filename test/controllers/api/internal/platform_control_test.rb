@@ -74,6 +74,51 @@ class Api::Internal::PlatformControlTest < ActionDispatch::IntegrationTest
     refute created.reload.suspended?
   end
 
+  test "only an owner can permanently delete a suspended restaurant after slug confirmation" do
+    @restaurant.update!(status: "suspended", suspension_reason: "Encerrado", suspended_at: Time.current)
+
+    delete "/api/internal/restaurants/#{@restaurant.id}", params: { confirmation_slug: @restaurant.slug }, headers: bearer(@read_only.api_token), as: :json
+    assert_response :forbidden
+    assert Restaurant.exists?(@restaurant.id)
+
+    delete "/api/internal/restaurants/#{@restaurant.id}", params: { confirmation_slug: "slug-incorreto" }, headers: bearer(@owner.api_token), as: :json
+    assert_response :unprocessable_entity
+    assert Restaurant.exists?(@restaurant.id)
+
+    delete "/api/internal/restaurants/#{@restaurant.id}", params: { confirmation_slug: @restaurant.slug }, headers: bearer(@owner.api_token), as: :json
+    assert_response :no_content
+    refute Restaurant.exists?(@restaurant.id)
+    event = PlatformAuditEvent.find_by!(action: "restaurant.delete", target_id: @restaurant.id)
+    assert_equal "success", event.outcome
+    assert_equal @owner.id, event.platform_user_id
+  end
+
+  test "active restaurant deletion is rejected without removing data" do
+    delete "/api/internal/restaurants/#{@restaurant.id}", params: { confirmation_slug: @restaurant.slug }, headers: bearer(@owner.api_token), as: :json
+
+    assert_response :conflict
+    assert_equal "lifecycle_conflict", response.parsed_body["error"]
+    assert Restaurant.exists?(@restaurant.id)
+    assert User.exists?(@tenant.id)
+  end
+
+  test "audit failure rolls back restaurant deletion" do
+    @restaurant.update!(status: "suspended", suspension_reason: "Encerrado", suspended_at: Time.current)
+
+    original_record = PlatformAudit.method(:record)
+    PlatformAudit.define_singleton_method(:record) { |**| nil }
+    begin
+      delete "/api/internal/restaurants/#{@restaurant.id}", params: { confirmation_slug: @restaurant.slug }, headers: bearer(@owner.api_token), as: :json
+    ensure
+      PlatformAudit.define_singleton_method(:record, original_record)
+    end
+
+    assert_response :internal_server_error
+    assert_equal "deletion_failed", response.parsed_body["error"]
+    assert Restaurant.exists?(@restaurant.id)
+    assert User.exists?(@tenant.id)
+  end
+
   test "auditor filters history and diagnostics contain build identity" do
     PlatformAudit.record(action: "restaurant.update", outcome: "success", actor: @owner, target: @restaurant)
     get "/api/internal/audit_events?restaurant_id=#{@restaurant.id}&outcome=success", headers: bearer(@auditor.api_token)

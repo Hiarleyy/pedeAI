@@ -5,7 +5,8 @@ module Api
       before_action -> { require_platform_permission!("restaurants:create") }, only: :create
       before_action -> { require_platform_permission!("restaurants:update") }, only: :update
       before_action -> { require_platform_permission!("restaurants:lifecycle") }, only: %i[suspend reactivate]
-      before_action :set_restaurant, only: %i[show update suspend reactivate]
+      before_action -> { require_platform_permission!("restaurants:delete") }, only: :destroy
+      before_action :set_restaurant, only: %i[show update suspend reactivate destroy]
 
       def index
         page = [params.fetch(:page, 1).to_i, 1].max
@@ -59,6 +60,20 @@ module Api
         @restaurant.reactivate!
         PlatformAudit.record(action: "restaurant.reactivate", outcome: "success", actor: current_platform_user, target: @restaurant, justification: params[:reason], request: request)
         render json: serialize_many([@restaurant]).first
+      end
+
+      def destroy
+        @restaurant.with_lock do
+          return lifecycle_conflict("Restaurant must be suspended before deletion") unless @restaurant.suspended?
+          return render(json: { error: "validation_error", messages: ["Confirmation slug does not match"] }, status: :unprocessable_entity) unless params[:confirmation_slug] == @restaurant.slug
+
+          @restaurant.destroy_tenant!
+          audit_event = PlatformAudit.record(action: "restaurant.delete", outcome: "success", actor: current_platform_user, target: @restaurant, request: request)
+          raise ActiveRecord::RecordNotSaved.new("Could not record restaurant deletion", @restaurant) unless audit_event
+        end
+        head :no_content
+      rescue ActiveRecord::RecordNotSaved
+        render json: { error: "deletion_failed", messages: ["Restaurant deletion could not be completed"] }, status: :internal_server_error
       end
 
       private

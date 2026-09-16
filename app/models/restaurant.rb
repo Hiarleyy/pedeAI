@@ -1,8 +1,8 @@
 class Restaurant < ApplicationRecord
-  has_many :users, dependent: :restrict_with_error
-  has_many :categories, dependent: :restrict_with_error
-  has_many :products, dependent: :restrict_with_error
-  has_many :orders, dependent: :restrict_with_error
+  has_many :orders, dependent: :destroy
+  has_many :products, dependent: :destroy
+  has_many :categories, dependent: :destroy
+  has_many :users, dependent: :destroy
 
   SUPPORTED_FONTS = %w[inter roboto montserrat poppins playfair-display open-sans].freeze
   MENU_INFORMATION_DEFAULTS = {
@@ -72,6 +72,13 @@ class Restaurant < ApplicationRecord
   def reactivate!
     raise ActiveRecord::RecordInvalid, self unless suspended?
     update!(status: "active", suspension_reason: nil, suspended_at: nil)
+  end
+
+  def destroy_tenant!
+    transaction do
+      users.find_each(&:destroy_from_tenant_cleanup!)
+      destroy!
+    end
   end
 
   def touch_last_access!
