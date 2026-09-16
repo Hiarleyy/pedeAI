@@ -2,9 +2,19 @@ Rails.application.routes.draw do
   get "/favicon.ico", to: proc { |_env| [204, { "Cache-Control" => "public, max-age=86400" }, []] }
 
   namespace :api do
+    namespace :internal do
+      resource :session, only: :create
+      resources :restaurants, only: %i[index show create update] do
+        member do
+          post :suspend
+          post :reactivate
+        end
+      end
+      resources :audit_events, only: :index
+      resource :diagnostics, only: :show
+    end
     namespace :v1 do
       resource :session, only: :create
-      post "restaurants", to: "restaurants#create"
 
       scope "restaurants/:restaurant_slug" do
         get "", to: "restaurants#show"
@@ -23,6 +33,7 @@ Rails.application.routes.draw do
   get "/menu-import-template.json", to: proc { |_env| [200, { "Content-Type" => "application/json; charset=utf-8", "Content-Disposition" => "attachment; filename=cardapio-modelo-v1.json" }, [File.read(Rails.root.join("docs/menu-import-template.json"))]] }
   get "/docs", to: proc { |_env| [200, { "Content-Type" => "text/html; charset=utf-8" }, [File.read(Rails.root.join("docs/swagger.html"))]] }
   get "/admin", to: proc { |_env| [200, { "Content-Type" => "text/html; charset=utf-8" }, [File.read(Rails.root.join("docs/admin.html"))]] }
+  get "/control", to: proc { |_env| [200, { "Content-Type" => "text/html; charset=utf-8" }, [File.read(Rails.root.join("docs/control.html"))]] }
   get "/admin/:restaurant_slug", to: "pages#admin"
   root to: proc { |_env| [200, { "Content-Type" => "text/html; charset=utf-8" }, [File.read(Rails.root.join("docs/pagina-inicial.html"))]] }
   get "/cardapio", to: proc { |_env| [200, { "Content-Type" => "text/html; charset=utf-8" }, [File.read(Rails.root.join("docs/menu.html"))]] }

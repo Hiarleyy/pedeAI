@@ -10,6 +10,7 @@ module Api
       before_action :authenticate_admin_listing!, only: :index
       before_action :authenticate_user!, only: %i[create update destroy]
       before_action :authorize_restaurant!, only: %i[create update destroy]
+      before_action :require_active_restaurant!, only: %i[create update destroy]
       before_action -> { require_permission!("products:write") }, only: %i[create update destroy]
 
       def index

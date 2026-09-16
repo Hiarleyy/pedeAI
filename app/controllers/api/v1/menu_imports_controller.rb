@@ -6,6 +6,7 @@ module Api
       before_action :resolve_restaurant!
       before_action :authenticate_user!
       before_action :authorize_restaurant!
+      before_action :require_active_restaurant!
       before_action -> { require_permission!("categories:write") }
       before_action -> { require_permission!("products:write") }
 

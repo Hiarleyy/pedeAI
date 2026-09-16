@@ -5,6 +5,7 @@ module Api
       before_action :resolve_restaurant!
       before_action :authenticate_user!, only: %i[create update destroy]
       before_action :authorize_restaurant!, only: %i[create update destroy]
+      before_action :require_active_restaurant!, only: %i[create update destroy]
       before_action -> { require_permission!("categories:write") }, only: %i[create update destroy]
 
       def index

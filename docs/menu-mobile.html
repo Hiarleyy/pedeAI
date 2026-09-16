@@ -193,6 +193,13 @@
     .tracking-timeline li.cancelled::before { border-color: #b42318; background: #b42318; }
     .tracking-refresh { width: 100%; min-height: 37px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--accent); font-size: 10px; font-weight: 800; }
     .back-to-menu { display: block; margin: 13px auto 0; border: 0; background: transparent; color: var(--accent); font-size: 9px; font-weight: 800; }
+    .closed-modal { position: fixed; z-index: 150; inset: 0; display: grid; place-items: center; padding: 18px; background: rgb(0 0 0 / .56); backdrop-filter: blur(3px); }
+    .closed-modal[hidden] { display: none; }
+    .closed-modal-card { width: min(390px, 100%); border-radius: 18px; padding: 28px 20px 20px; background: #fff; text-align: center; box-shadow: 0 20px 50px rgb(0 0 0 / .3); }
+    .closed-modal-icon { display: grid; place-items: center; width: 55px; height: 55px; margin: 0 auto 14px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 11%, white); color: var(--accent); font-size: 26px; }
+    .closed-modal-card h2 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
+    .closed-modal-card p { margin: 9px 0 19px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .closed-modal-close { width: 100%; min-height: 42px; border: 0; border-radius: 22px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 900; }
     /* Reference-inspired menu surface */
     .mobile-menu { padding-bottom: calc(112px + env(safe-area-inset-bottom)); background: #fff; }
     .hero { height: 174px; }
@@ -442,6 +449,15 @@
     </main>
   </section>
 
+  <section class="closed-modal" id="restaurant-closed-modal" aria-labelledby="restaurant-closed-title" aria-describedby="restaurant-closed-message" aria-modal="true" role="dialog" hidden>
+    <div class="closed-modal-card">
+      <div class="closed-modal-icon" aria-hidden="true"><i class="lni lni-alarm-1"></i></div>
+      <h2 id="restaurant-closed-title">Restaurante fechado</h2>
+      <p id="restaurant-closed-message"></p>
+      <button class="closed-modal-close" id="close-restaurant-closed" type="button">Entendi</button>
+    </div>
+  </section>
+
   <section class="order-tracking-page" id="order-tracking" aria-labelledby="tracking-title" aria-modal="true" role="dialog" hidden>
     <div class="order-tracking-shell">
       <button class="tracking-close" id="close-order-tracking" type="button" aria-label="Fechar acompanhamento">×</button>
@@ -461,6 +477,15 @@
       const fallbackBanner = "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=900&q=84";
       const fallbackProduct = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=82";
       const state = { restaurant: null, products: [], cart: new Map(), detail: { product: null, addonIds: new Set(), variantId: null, note: "", quantity: 1, trigger: null } };
+      const productImageFallback = () => state.restaurant?.product_placeholder_url || fallbackProduct;
+      function handleProductImageError(event) {
+        const image = event.target;
+        if (!image.matches?.(".product-media img, .cart-item img, #product-detail-image")) return;
+        const fallback = new URL(productImageFallback(), document.baseURI).href;
+        if (image.src === fallback) return;
+        image.src = fallback;
+      }
+      document.addEventListener("error", handleProductImageError, true);
       const productsRegion = document.querySelector("#products");
       productsRegion.setAttribute("aria-busy", "true");
       if (!restaurantApi) {
@@ -472,6 +497,24 @@
       const productId = product => Number(product.id ?? product.product_id);
       const slugify = value => "category-" + String(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       const safeHttpsUrl = value => /^https:\/\//i.test(value || "") ? value : "";
+      const isRestaurantOpen = () => state.restaurant?.menu_information_status?.open === true;
+      const closedMessage = () => {
+        const nextOpening = state.restaurant?.menu_information_status?.opens_at;
+        return nextOpening ? `Restaurante fechado. Abre às ${nextOpening}.` : "Restaurante fechado no momento.";
+      };
+      function showRestaurantClosedModal() {
+        const modal = document.querySelector("#restaurant-closed-modal");
+        document.querySelector("#restaurant-closed-message").textContent = closedMessage();
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+        requestAnimationFrame(() => document.querySelector("#close-restaurant-closed").focus());
+      }
+      function closeRestaurantClosedModal() {
+        const modal = document.querySelector("#restaurant-closed-modal");
+        if (modal.hidden) return;
+        modal.hidden = true;
+        if (document.querySelector("#cart-dialog").hidden) document.body.style.overflow = "";
+      }
       const trackingPage = document.querySelector("#order-tracking"), trackingForm = document.querySelector("#tracking-form"), trackingSteps = ["pending", "confirmed", "preparing", "ready", "delivered"], trackingLabels = { pending: "Pedido recebido", confirmed: "Pedido confirmado", preparing: "Em preparo", ready: "Pronto", delivered: "Pedido concluído" };
       let trackingTrigger = null, latestTrackingOrderId = "";
 
@@ -548,7 +591,7 @@
         const info = restaurant.menu_information || {}, visibility = info.visibility || {}, delivery = info.delivery || {}, location = info.location || {}, contact = info.contact || {}, social = info.social || {}, status = restaurant.menu_information_status || {};
         const element = document.querySelector("#restaurant-information"), meta = [], actions = [];
         const item = (html, cls = "") => `<span class="restaurant-meta-item ${cls}">${html}</span>`;
-        if (visibility.operating && (status.open === true || status.opens_at || status.closes_at)) { meta.push(item(`<span class="status-dot"></span><strong>${status.open ? "Aberto agora" : "Fechado agora"}</strong>`, "restaurant-meta-status")); meta.push(item(status.open ? `Fecha às ${escapeHtml(status.closes_at || "")}` : `Abre às ${escapeHtml(status.opens_at || "")}`)); }
+        if (status.open === false || visibility.operating && (status.open === true || status.opens_at || status.closes_at)) { meta.push(item(`<span class="status-dot"></span><strong>${status.open ? "Aberto agora" : "Fechado agora"}</strong>`, "restaurant-meta-status")); if (status.open || status.opens_at) meta.push(item(status.open ? `Fecha às ${escapeHtml(status.closes_at || "")}` : `Abre às ${escapeHtml(status.opens_at || "")}`)); }
         if (visibility.delivery && delivery.estimate) meta.push(item(`<i class="lni lni-bike" aria-hidden="true"></i><span id="restaurant-delivery-estimate">${escapeHtml(delivery.estimate)}</span>`, "restaurant-delivery"));
         if (visibility.delivery && delivery.fee !== null && delivery.fee !== undefined && delivery.fee !== "") { const fee = Number(delivery.fee || 0); meta.push(item(`<i class="lni lni-dollar" aria-hidden="true"></i>Taxa ${fee === 0 ? "Grátis" : money(fee)}`, "restaurant-delivery-fee-card")); }
         const metadata = meta.map((value, index) => `${index ? '<span class="restaurant-information-divider" aria-hidden="true">•</span>' : ""}${value}`).join("");
@@ -563,7 +606,7 @@
         const info = restaurant.menu_information || {}, visibility = info.visibility || {}, delivery = info.delivery || {}, location = info.location || {}, contact = info.contact || {}, social = info.social || {}, status = restaurant.menu_information_status || {};
         const element = document.querySelector("#restaurant-information"), meta = [], actions = [];
         const item = (html, cls = "") => `<span class="restaurant-meta-item ${cls}">${html}</span>`;
-        if (visibility.operating && (status.open === true || status.opens_at || status.closes_at)) { meta.push(item(`<span class="status-dot"></span><strong>${status.open ? "Aberto agora" : "Fechado agora"}</strong>`, "restaurant-meta-status")); meta.push(item(status.open ? `Fecha às ${escapeHtml(status.closes_at || "")}` : `Abre às ${escapeHtml(status.opens_at || "")}`)); }
+        if (status.open === false || visibility.operating && (status.open === true || status.opens_at || status.closes_at)) { meta.push(item(`<span class="status-dot"></span><strong>${status.open ? "Aberto agora" : "Fechado agora"}</strong>`, "restaurant-meta-status")); if (status.open || status.opens_at) meta.push(item(status.open ? `Fecha às ${escapeHtml(status.closes_at || "")}` : `Abre às ${escapeHtml(status.opens_at || "")}`)); }
         if (visibility.delivery && delivery.estimate) meta.push(item(`<i class="lni lni-bike" aria-hidden="true"></i>${escapeHtml(delivery.estimate)}`, "restaurant-delivery"));
         if (visibility.delivery && delivery.fee !== null && delivery.fee !== undefined && delivery.fee !== "") { const fee = Number(delivery.fee || 0); meta.push(item(`<i class="lni lni-dollar" aria-hidden="true"></i>Taxa ${fee === 0 ? "Grátis" : money(fee)}`, "restaurant-delivery-fee-card")); }
         const metadata = meta.map((value, index) => `${index ? '<span class="restaurant-information-divider" aria-hidden="true">•</span>' : ""}${value}`).join("");
@@ -577,7 +620,11 @@
 
       function cartDetails() {
         const items = [...state.cart.values()];
-        return { items, count: items.reduce((sum, item) => sum + item.quantity, 0), total: items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0) };
+        return { items, count: items.reduce((sum, item) => sum + item.quantity, 0), total: items.reduce((sum, item) => sum + Number(item.unitPrice ?? item.product.price) * item.quantity, 0) };
+      }
+
+      function composeCustomizedUnitPrice(product, variant = null, addons = []) {
+        return Number(variant?.price ?? product.price) + addons.reduce((sum, addon) => sum + Number(addon.price), 0);
       }
 
       function renderProducts() {
@@ -594,7 +641,7 @@
             ${products.map(product => `
               <article class="product">
                 <div class="product-copy"><h3>${escapeHtml(product.name)}</h3><p>${escapeHtml(product.description || "Preparado com ingredientes selecionados.")}</p><span class="price">${money(product.price)}</span></div>
-                <div class="product-media"><img src="${escapeHtml(product.image_url || state.restaurant?.product_placeholder_url || fallbackProduct)}" alt="${escapeHtml(product.name)}" loading="lazy"><button class="add" type="button" data-add="${productId(product)}" aria-label="Adicionar ${escapeHtml(product.name)}">+</button></div>
+                <div class="product-media"><img src="${escapeHtml(product.image_url || productImageFallback())}" alt="${escapeHtml(product.name)}" loading="lazy"><button class="add" type="button" data-add="${productId(product)}" aria-label="Adicionar ${escapeHtml(product.name)}">+</button></div>
               </article>`).join("")}
           </section>`).join("") || '<div class="empty"><strong>Cardápio indisponível</strong><span>Tente novamente em alguns instantes.</span></div>';
       }
@@ -603,17 +650,25 @@
         const { items, count, total } = cartDetails();
         const bar = document.querySelector("#cart-bar");
         bar.hidden = count === 0;
+        bar.disabled = false;
+        bar.setAttribute("aria-disabled", String(!isRestaurantOpen()));
+        bar.title = isRestaurantOpen() ? "" : closedMessage();
         document.querySelector("#cart-count").textContent = count;
         bar.setAttribute("aria-label", `Ver sacola com ${count} ${count === 1 ? "item" : "itens"}`);
         document.querySelector("#dialog-subtotal").textContent = money(total);
         document.querySelector("#dialog-total").textContent = money(total);
         document.querySelector("#footer-total").textContent = money(total);
-        document.querySelector("#cart-items").innerHTML = items.length ? items.map(({ product, addons = [], quantity }) => `
+        document.querySelector("#cart-items").innerHTML = items.length ? items.map(({ product, addons = [], quantity, unitPrice }) => `
           <div class="cart-item">
-            <img src="${escapeHtml(product.image_url || state.restaurant?.product_placeholder_url || fallbackProduct)}" alt="">
-            <div class="cart-item-copy"><strong>${escapeHtml(product.name)}</strong>${addons.length ? `<small>+ ${addons.map(addon => escapeHtml(addon.name)).join(', ')}</small>` : ''}<span class="cart-item-price">${money(Number(product.price) * quantity)}</span></div>
+            <img src="${escapeHtml(product.image_url || productImageFallback())}" alt="">
+            <div class="cart-item-copy"><strong>${escapeHtml(product.name)}</strong>${addons.length ? `<small>+ ${addons.map(addon => escapeHtml(addon.name)).join(', ')}</small>` : ''}<span class="cart-item-price">${money(Number(unitPrice ?? product.price) * quantity)}</span></div>
             <div class="cart-item-actions"><strong>${quantity}x</strong><button class="remove-item" type="button" data-delete="${productId(product)}" aria-label="Remover ${escapeHtml(product.name)} da sacola"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg></button></div>
           </div>`).join("") : '<div class="empty"><strong>Sua sacola está vazia</strong><span>Adicione um item do cardápio.</span></div>';
+        const submit = document.querySelector("#checkout .submit");
+        const message = document.querySelector("#form-message");
+        submit.disabled = count === 0;
+        submit.setAttribute("aria-disabled", String(!isRestaurantOpen()));
+        if (!isRestaurantOpen()) message.textContent = closedMessage();
       }
 
       const detailSheet = document.querySelector("#product-detail");
@@ -631,7 +686,7 @@
         if (!product) return 0;
         const extras = activeAddons().filter(addon => state.detail.addonIds.has(Number(addon.id)));
         const variant = (product.variants || []).find(item => Number(item.id) === state.detail.variantId);
-        return (Number(variant?.price || product.price) + extras.reduce((sum, addon) => sum + Number(addon.price), 0)) * state.detail.quantity;
+        return composeCustomizedUnitPrice(product, variant, extras) * state.detail.quantity;
       }
 
       function renderProductDetail() {
@@ -639,7 +694,7 @@
         if (!product) return;
         const addons = activeAddons(product);
         const variants = (product.variants || []).filter(variant => variant.available !== false);
-        document.querySelector("#product-detail-image").src = product.image_url || fallbackProduct;
+        document.querySelector("#product-detail-image").src = product.image_url || productImageFallback();
         document.querySelector("#product-detail-image").alt = product.name;
         document.querySelector("#product-detail-name").textContent = product.name;
         document.querySelector("#product-detail-description").textContent = product.description || "Preparado com ingredientes selecionados.";
@@ -679,9 +734,9 @@
         const addons = activeAddons(product).filter(addon => addonIds.includes(Number(addon.id)));
         const variant = (product.variants || []).find(item => Number(item.id) === state.detail.variantId);
         if ((product.variants || []).some(item => item.available !== false) && !variant) { detailVariants.querySelector("input")?.focus(); return; }
-        const price = Number(variant?.price || product.price) + addons.reduce((sum, addon) => sum + Number(addon.price), 0);
+        const price = composeCustomizedUnitPrice(product, variant, addons);
         const key = `${productId(product)}:${state.detail.variantId || "base"}:${addonIds.join(",")}:${state.detail.note}`;
-        const item = state.cart.get(key) || { product: { ...product, price }, product_id: productId(product), addons, variant, note: state.detail.note, quantity: 0 };
+        const item = state.cart.get(key) || { product, product_id: productId(product), addons, variant, unitPrice: price, note: state.detail.note, quantity: 0 };
         item.quantity += state.detail.quantity;
         state.cart.set(key, item);
         renderCart();
@@ -691,14 +746,16 @@
       function showOrderConfirmation(order, cart, orderData) {
         const confirmationPage = document.querySelector("#confirmation-page");
         const orderNumber = String(order.id || "").padStart(4, "0");
+        const confirmedItems = Array.isArray(order.order_items) ? order.order_items : [];
+        const confirmedTotal = Number(order.total ?? cart.total);
         latestTrackingOrderId = order.id || "";
         document.querySelector("#confirmation-number").textContent = `#${orderNumber}`;
         document.querySelector("#confirmation-address").textContent = orderData.delivery_address;
-        document.querySelector("#confirmation-items").innerHTML = cart.items.map(({ product, addons = [], quantity }) => `
-          <div class="confirmed-item"><b>${quantity}x</b><span>${escapeHtml(product.name)}${addons.length ? ` + ${addons.map(addon => escapeHtml(addon.name)).join(', ')}` : ''}</span><span>${money(Number(product.price) * quantity)}</span></div>
+        document.querySelector("#confirmation-items").innerHTML = confirmedItems.map(item => `
+          <div class="confirmed-item"><b>${item.quantity}x</b><span>${escapeHtml(item.product?.name || "Item")}${item.variant_name ? ` · ${escapeHtml(item.variant_name)}` : ""}${item.addons?.length ? ` + ${item.addons.map(addon => escapeHtml(addon.name)).join(', ')}` : ''}</span><span>${money(Number(item.unit_price) * Number(item.quantity))}</span></div>
         `).join("");
-        document.querySelector("#confirmation-subtotal").textContent = money(cart.total);
-        document.querySelector("#confirmation-total").textContent = money(cart.total);
+        document.querySelector("#confirmation-subtotal").textContent = money(confirmedTotal);
+        document.querySelector("#confirmation-total").textContent = money(confirmedTotal);
         checkoutPage.hidden = true;
         confirmationPage.hidden = false;
         confirmationPage.scrollTop = 0;
@@ -745,10 +802,12 @@
       document.querySelector("#close-product-detail").addEventListener("click", closeProductDetail);
       document.querySelector("#track-order-fab").addEventListener("click", event => openOrderTracking(event.currentTarget));
       document.querySelector("#close-order-tracking").addEventListener("click", closeOrderTracking);
+      document.querySelector("#close-restaurant-closed").addEventListener("click", closeRestaurantClosedModal);
       trackingForm.addEventListener("submit", submitTracking);
-      document.addEventListener("keydown", event => { if (event.key === "Escape" && !detailSheet.hidden) closeProductDetail(); if (event.key === "Escape" && !trackingPage.hidden) closeOrderTracking(); });
+      document.addEventListener("keydown", event => { if (event.key === "Escape" && !detailSheet.hidden) closeProductDetail(); if (event.key === "Escape" && !trackingPage.hidden) closeOrderTracking(); if (event.key === "Escape") closeRestaurantClosedModal(); });
       const checkoutPage = document.querySelector("#cart-dialog");
       document.querySelector("#cart-bar").addEventListener("click", () => {
+        if (!isRestaurantOpen()) { showRestaurantClosedModal(); return; }
         checkoutPage.hidden = false;
         document.body.style.overflow = "hidden";
         checkoutPage.querySelector(".checkout-scroll").scrollTop = 0;
@@ -828,6 +887,7 @@
         const form = event.currentTarget;
         const message = document.querySelector("#form-message");
         const submit = form.querySelector(".submit");
+        if (!isRestaurantOpen()) { message.textContent = closedMessage(); showRestaurantClosedModal(); return; }
         const data = Object.fromEntries(new FormData(form));
         if (data.order_type === "delivery" && !data.delivery_address.trim()) { message.textContent = "Informe o endereço de entrega."; return; }
         const orderCart = cartDetails();
@@ -837,7 +897,15 @@
         try {
           const response = await fetch(apiBase + restaurantApi + "/orders", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ order: { ...data, items } }) });
           const result = await response.json();
-          if (!response.ok) throw new Error((result.messages || [result.error || "Erro ao criar pedido."]).join(" "));
+          if (!response.ok) {
+            if (result.error === "restaurant_closed") {
+              state.restaurant.menu_information_status = { open: false, closes_at: null, opens_at: result.next_opening };
+              renderRestaurantInformation(state.restaurant);
+              renderCart();
+              showRestaurantClosedModal();
+            }
+            throw new Error((result.messages || [result.error || "Erro ao criar pedido."]).join(" "));
+          }
           showOrderConfirmation(result, orderCart, data);
           state.cart.clear();
           renderCart();
@@ -874,6 +942,18 @@
         document.documentElement.style.setProperty('--font-family', config.css);
       };
 
+      async function refreshOperatingStatus() {
+        try {
+          const response = await fetch(apiBase + restaurantApi, { headers: { Accept: "application/json" } });
+          if (!response.ok) return;
+          state.restaurant = { ...state.restaurant, ...await response.json() };
+          renderRestaurantInformation(state.restaurant);
+          renderCart();
+        } catch {
+          // A falha temporária mantém o último estado conhecido; o backend continua autoritativo.
+        }
+      }
+
       Promise.all([
         fetch(apiBase + restaurantApi, { headers: { Accept: "application/json" } }).then(response => response.ok ? response.json() : Promise.reject(new Error("Não foi possível carregar o restaurante."))),
         fetch(apiBase + restaurantApi + "/products", { headers: { Accept: "application/json" } }).then(response => response.ok ? response.json() : Promise.reject(new Error("Não foi possível carregar o cardápio.")))
@@ -891,7 +971,9 @@
         document.title = `${restaurant.name || "Restaurante"} — Cardápio`;
         renderRestaurantInformation(restaurant);
         renderProducts();
+        renderCart();
         productsRegion.removeAttribute("aria-busy");
+        setInterval(refreshOperatingStatus, 60000);
       }).catch(error => {
         productsRegion.removeAttribute("aria-busy");
         document.querySelector("#products").innerHTML = `<div class="empty"><strong>Não foi possível carregar</strong><span>${escapeHtml(error.message)}</span></div>`;

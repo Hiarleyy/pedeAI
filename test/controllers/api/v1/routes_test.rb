@@ -19,7 +19,9 @@ class Api::V1::RoutesTest < ActionDispatch::IntegrationTest
     end
 
     assert_routing({ path: "/api/v1/session", method: :post }, controller: "api/v1/sessions", action: "create")
-    assert_routing({ path: "/api/v1/restaurants", method: :post }, controller: "api/v1/restaurants", action: "create")
+    assert_routing({ path: "/api/internal/session", method: :post }, controller: "api/internal/sessions", action: "create")
+    assert_routing({ path: "/api/internal/restaurants", method: :post }, controller: "api/internal/restaurants", action: "create")
+    assert_raises(ActionController::RoutingError) { Rails.application.routes.recognize_path("/api/v1/restaurants", method: :post) }
     assert_routing({ path: "/api/v1/restaurants/casa", method: :get }, controller: "api/v1/restaurants", action: "show", restaurant_slug: "casa")
   end
 

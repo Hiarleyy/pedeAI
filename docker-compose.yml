@@ -13,7 +13,11 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
       DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-pedeai_production}
       REDIS_URL: redis://redis:6379/0
+      PLATFORM_OWNER_NAME: ${PLATFORM_OWNER_NAME:-PedeAi Owner}
+      PLATFORM_OWNER_EMAIL: ${PLATFORM_OWNER_EMAIL:-AdminControl@pedeai.dev}
+      PLATFORM_OWNER_PASSWORD: ${PLATFORM_OWNER_PASSWORD:-pedeaiDev}
     expose: ["3000"]
+    volumes: [product_images:/app/public/uploads/products]
     networks: [internal, web]
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS -H \"Host: $$APP_HOST\" http://localhost:3000/up || exit 1"]
@@ -42,6 +46,9 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
       DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-pedeai_production}
       REDIS_URL: redis://redis:6379/0
+      PLATFORM_OWNER_NAME: ${PLATFORM_OWNER_NAME:-PedeAi Owner}
+      PLATFORM_OWNER_EMAIL: ${PLATFORM_OWNER_EMAIL:-AdminControl@pedeai.dev}
+      PLATFORM_OWNER_PASSWORD: ${PLATFORM_OWNER_PASSWORD:-pedeaiDev}
     networks: [internal]
     deploy:
       replicas: 1
@@ -90,6 +97,8 @@ volumes:
     name: pedeai_postgres_data
   redis_data:
     name: pedeai_redis_data
+  product_images:
+    name: pedeai_product_images
 
 networks:
   web:

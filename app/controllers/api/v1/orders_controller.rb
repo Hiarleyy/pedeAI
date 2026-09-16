@@ -5,6 +5,7 @@ module Api
       before_action :resolve_restaurant!
       before_action :authenticate_user!, only: %i[index show update]
       before_action :authorize_restaurant!, only: %i[index show update]
+      before_action :require_active_restaurant!, only: %i[create update]
       before_action -> { require_permission!("orders:read") }, only: %i[index show]
       before_action -> { require_permission!("orders:update") }, only: :update
 
@@ -19,6 +20,9 @@ module Api
       end
 
       def create
+        status = current_restaurant.menu_information_status
+        return render_restaurant_closed(status) unless status["open"]
+
         permitted = order_params
         order = current_restaurant.orders.new(permitted.except(:items))
         order.order_items = Array(permitted[:items]).map do |item|
@@ -32,8 +36,8 @@ module Api
           addons = product.addons.where(available: true, id: addon_ids)
           reject_invalid_addons!(order) if addons.length != addon_ids.length
 
-          base_price = variant ? variant.price : product.price
-          order_item = OrderItem.new(product: product, quantity: item[:quantity], unit_price: base_price + addons.sum(:price), variant_name: variant&.name, variant_price: variant&.price, note: item[:note])
+          unit_price = OrderItemPrice.calculate(product: product, variant: variant, addons: addons)
+          order_item = OrderItem.new(product: product, quantity: item[:quantity], unit_price: unit_price, variant_name: variant&.name, variant_price: variant&.price, note: item[:note])
           addons.each { |addon| order_item.addons.build(name: addon.name, price: addon.price) }
           order_item
         end
@@ -110,6 +114,12 @@ module Api
 
       def render_tracking_limited
         render json: { error: "rate_limited", messages: ["Tente novamente em alguns instantes."] }, status: :too_many_requests
+      end
+
+      def render_restaurant_closed(operating_status)
+        next_opening = operating_status["opens_at"]
+        message = next_opening.present? ? "Restaurante fechado. Abre às #{next_opening}." : "Restaurante fechado no momento."
+        render json: { error: "restaurant_closed", messages: [message], next_opening: next_opening }, status: :conflict
       end
 
       def reject_invalid_addons!(order)

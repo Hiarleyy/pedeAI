@@ -56,6 +56,32 @@ products.each do |name, description, price, category_name|
   product.save!
 end
 
+# Variant prices are absolute final prices; addon prices are increments.
+customizations = {
+  "Classic Burger" => {
+    variants: [["Carne 180g", 31.90], ["Carne 220g", 34.90]],
+    addons: [["Bacon extra", 5.50], ["Queijo extra", 4.00], ["Ovo", 3.00]]
+  },
+  "Bacon Supreme" => {
+    variants: [["Carne 220g", 38.90], ["Carne 250g", 41.90]],
+    addons: [["Bacon extra", 5.50], ["Queijo extra", 4.00], ["Ovo", 3.00]]
+  },
+  "Chicken Crispy" => {
+    variants: [["Filé duplo", 36.90], ["Filé triplo", 41.90]],
+    addons: [["Bacon extra", 5.50], ["Queijo extra", 4.00], ["Molho especial", 2.50]]
+  },
+  "Veggie Burger" => {
+    variants: [["Burger vegetal duplo", 38.90], ["Burger vegetal triplo", 44.90]],
+    addons: [["Queijo extra", 4.00], ["Cebola caramelizada", 3.50], ["Molho especial", 2.50]]
+  }
+}.freeze
+
+customizations.each do |product_name, configuration|
+  product = restaurant.products.find_by!(name: product_name)
+  product.replace_variants!(configuration[:variants].each_with_index.map { |(name, price), position| { name: name, price: price, available: true, position: position } })
+  product.replace_addons!(configuration[:addons].map { |name, price| { name: name, price: price, available: true } })
+end
+
 admin_email = ENV.fetch("BURGER_LAB_ADMIN_EMAIL", "admin@burger-lab.pedeai.test")
 admin_password = ENV.fetch("BURGER_LAB_ADMIN_PASSWORD", "admin123")
 admin = User.find_or_initialize_by(email: admin_email)

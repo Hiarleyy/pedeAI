@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_09_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_120200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,6 +64,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_09_170000) do
     t.index ["status"], name: "index_orders_on_status"
   end
 
+  create_table "platform_audit_events", force: :cascade do |t|
+    t.string "action", null: false
+    t.string "actor_identifier"
+    t.datetime "created_at", null: false
+    t.jsonb "details", default: {}, null: false
+    t.string "ip_address"
+    t.text "justification"
+    t.string "outcome", null: false
+    t.bigint "platform_user_id"
+    t.string "request_id"
+    t.bigint "target_id"
+    t.string "target_type"
+    t.datetime "updated_at", null: false
+    t.index ["action"], name: "index_platform_audit_events_on_action"
+    t.index ["created_at"], name: "index_platform_audit_events_on_created_at"
+    t.index ["outcome"], name: "index_platform_audit_events_on_outcome"
+    t.index ["platform_user_id"], name: "index_platform_audit_events_on_platform_user_id"
+    t.index ["target_type", "target_id"], name: "index_platform_audit_events_on_target_type_and_target_id"
+  end
+
+  create_table "platform_users", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "last_login_at"
+    t.string "name", null: false
+    t.string "password_digest", null: false
+    t.string "role", default: "read_only", null: false
+    t.datetime "updated_at", null: false
+    t.index "lower((email)::text)", name: "index_platform_users_on_lower_email", unique: true
+    t.index ["role"], name: "index_platform_users_on_role"
+  end
+
   create_table "product_addons", force: :cascade do |t|
     t.boolean "available", default: true, null: false
     t.datetime "created_at", null: false
@@ -107,6 +140,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_09_170000) do
     t.text "banner_url"
     t.datetime "created_at", null: false
     t.string "font_family", default: "inter", null: false
+    t.datetime "last_access_at"
     t.text "logo_url"
     t.text "menu_description"
     t.jsonb "menu_information", default: {}, null: false
@@ -114,8 +148,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_09_170000) do
     t.string "primary_color", default: "#d34000", null: false
     t.text "product_placeholder_url"
     t.string "slug", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "suspended_at"
+    t.text "suspension_reason"
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_restaurants_on_slug", unique: true
+    t.index ["status"], name: "index_restaurants_on_status"
+    t.check_constraint "status::text = ANY (ARRAY['active'::character varying, 'suspended'::character varying]::text[])", name: "restaurants_status_check"
   end
 
   create_table "users", force: :cascade do |t|
@@ -138,6 +177,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_09_170000) do
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "restaurants"
+  add_foreign_key "platform_audit_events", "platform_users"
   add_foreign_key "product_addons", "products"
   add_foreign_key "product_variants", "products"
   add_foreign_key "products", "categories"

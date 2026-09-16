@@ -508,7 +508,7 @@
                   <p class="text-[9px] text-gray-400 mt-1">PNG, JPG ou WebP. Máximo de 2 MB.</p>
                 </div>
                 <div class="space-y-2 border-t pt-3">
-                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-gray-700">Adicionais</span><button type="button" @click="addAddon(newProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div>
+                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-gray-700">Adicionais (acréscimos ao preço)</span><button type="button" @click="addAddon(newProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div>
                   <div v-for="(addon, index) in newProductForm.addons" :key="index" class="grid grid-cols-[1fr_90px_auto_auto] gap-2 items-center">
                     <input v-model.trim="addon.name" required placeholder="Ex.: Queijo extra" class="rounded border-gray-300 text-xs">
                     <input v-model.number="addon.price" required min="0.01" step="0.01" type="number" placeholder="R$" class="rounded border-gray-300 text-xs">
@@ -516,7 +516,7 @@
                     <button type="button" @click="removeAddon(newProductForm, index)" class="text-red-600 text-xs" aria-label="Remover adicional">Remover</button>
                   </div>
                 </div>
-                <div class="space-y-2 border-t pt-3"><div class="flex justify-between items-center"><span class="text-xs font-semibold text-gray-700">Tamanhos / variações</span><button type="button" @click="addVariant(newProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div><div v-for="(variant, index) in newProductForm.variants" :key="index" class="grid grid-cols-[1fr_80px_55px_auto] gap-2 items-center"><input v-model.trim="variant.name" required placeholder="Ex.: Média" class="rounded border-gray-300 text-xs"><input v-model.number="variant.price" required min="0.01" step="0.01" type="number" placeholder="R$" class="rounded border-gray-300 text-xs"><label class="text-xs"><input v-model="variant.available" type="checkbox"> Ativo</label><button type="button" @click="removeVariant(newProductForm, index)" class="text-red-600 text-xs">Remover</button></div></div>
+                <div class="space-y-2 border-t pt-3"><div class="flex justify-between items-center"><span class="text-xs font-semibold text-gray-700">Tamanhos / variações — preço final</span><button type="button" @click="addVariant(newProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div><p class="text-[9px] text-gray-500">Informe o valor total do produto nesta variação, não apenas o acréscimo.</p><div v-for="(variant, index) in newProductForm.variants" :key="index" class="grid grid-cols-[1fr_110px_55px_auto] gap-2 items-center"><input v-model.trim="variant.name" required placeholder="Ex.: Média" class="rounded border-gray-300 text-xs"><input v-model.number="variant.price" required min="0.01" step="0.01" type="number" placeholder="Preço final" aria-label="Preço final da variação" class="rounded border-gray-300 text-xs"><label class="text-xs"><input v-model="variant.available" type="checkbox"> Ativo</label><button type="button" @click="removeVariant(newProductForm, index)" class="text-red-600 text-xs">Remover</button></div></div>
 
                 <button type="submit" :disabled="loading.newProduct"
                         class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-all shadow-md flex items-center justify-center gap-2">
@@ -592,7 +592,7 @@
                   <input type="file" accept="image/png,image/jpeg,image/webp" class="block w-full mt-1 text-xs" @change="editProductForm.image_file = $event.target.files?.[0] || null">
                 </label>
                 <div class="col-span-full space-y-2 border-t pt-3">
-                  <div class="flex justify-between items-center"><span class="text-sm font-semibold">Adicionais</span><button type="button" @click="addAddon(editProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div>
+                  <div class="flex justify-between items-center"><span class="text-sm font-semibold">Adicionais (acréscimos ao preço)</span><button type="button" @click="addAddon(editProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div>
                   <div v-for="(addon, index) in editProductForm.addons" :key="addon.id || index" class="grid grid-cols-[1fr_90px_auto_auto] gap-2 items-center">
                     <input v-model.trim="addon.name" required placeholder="Nome" class="rounded border-gray-300 text-xs">
                     <input v-model.number="addon.price" required min="0.01" step="0.01" type="number" class="rounded border-gray-300 text-xs">
@@ -600,7 +600,7 @@
                     <button type="button" @click="removeAddon(editProductForm, index)" class="text-red-600 text-xs">Remover</button>
                   </div>
                 </div>
-                <div class="col-span-full space-y-2 border-t pt-3"><div class="flex justify-between items-center"><span class="text-sm font-semibold">Tamanhos / variações</span><button type="button" @click="addVariant(editProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div><div v-for="(variant, index) in editProductForm.variants" :key="variant.id || index" class="grid grid-cols-[1fr_80px_55px_auto] gap-2 items-center"><input v-model.trim="variant.name" required placeholder="Nome" class="rounded border-gray-300 text-xs"><input v-model.number="variant.price" required min="0.01" step="0.01" type="number" class="rounded border-gray-300 text-xs"><label class="text-xs"><input v-model="variant.available" type="checkbox"> Ativo</label><button type="button" @click="removeVariant(editProductForm, index)" class="text-red-600 text-xs">Remover</button></div></div>
+                <div class="col-span-full space-y-2 border-t pt-3"><div class="flex justify-between items-center"><span class="text-sm font-semibold">Tamanhos / variações — preço final</span><button type="button" @click="addVariant(editProductForm)" class="text-xs text-primary-700 font-bold">+ Adicionar</button></div><p class="text-[9px] text-gray-500">Informe o valor total do produto nesta variação, não apenas o acréscimo.</p><div v-for="(variant, index) in editProductForm.variants" :key="variant.id || index" class="grid grid-cols-[1fr_110px_55px_auto] gap-2 items-center"><input v-model.trim="variant.name" required placeholder="Nome" class="rounded border-gray-300 text-xs"><input v-model.number="variant.price" required min="0.01" step="0.01" type="number" placeholder="Preço final" aria-label="Preço final da variação" class="rounded border-gray-300 text-xs"><label class="text-xs"><input v-model="variant.available" type="checkbox"> Ativo</label><button type="button" @click="removeVariant(editProductForm, index)" class="text-red-600 text-xs">Remover</button></div></div>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" v-model="editProductForm.available"> Produto disponível</label>
               </div>
               <div class="flex justify-end gap-3"><button type="button" @click="closeEditProduct" class="px-4 py-2 text-gray-600">Cancelar</button><button class="bg-primary-600 text-white rounded-lg px-4 py-2">Salvar alterações</button></div>
@@ -1561,6 +1561,12 @@
           formData.append('product[image]', form.image_file);
           return { body: formData };
         };
+        const confirmSuspiciousVariantPrices = form => {
+          const basePrice = Number(form.price);
+          const suspicious = (form.variants || []).filter(variant => variant.available !== false && Number(variant.price) < basePrice);
+          if (!suspicious.length) return true;
+          return window.confirm(`A variação ${suspicious.map(variant => variant.name || 'sem nome').join(', ')} está abaixo do preço base. O preço da variação deve ser o valor final do produto, não apenas o acréscimo. Deseja salvar mesmo assim?`);
+        };
 
         const importMenu = async () => {
           if (!menuImportFile.value) return;
@@ -1582,6 +1588,7 @@
 
         // Create Product
         const createProduct = async () => {
+          if (!confirmSuspiciousVariantPrices(newProductForm)) return;
           loading.newProduct = true;
           try {
             const saved = await apiRequest(restaurantResource('products'), {
@@ -1648,6 +1655,7 @@
               addToast('Revise o nome e o preço do produto antes de salvar.', 'error');
               return;
             }
+            if (!confirmSuspiciousVariantPrices(form)) return;
             const saved = await apiRequest(restaurantResource(`products/${source.id}`), { method: 'PATCH', ...productMutationBody(form) });
             const category = categories.value.find(item => item.id === saved.category_id);
             Object.assign(editingProduct.value, saved, { category: category ? { name: category.name } : null });

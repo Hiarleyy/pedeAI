@@ -7,7 +7,24 @@ compose_file="deploy/portainer-stack.yml"
 test -f "$env_file" || { echo "Arquivo de ambiente não encontrado: $env_file" >&2; exit 2; }
 docker compose --env-file "$env_file" -f "$compose_file" config --quiet
 
-if docker compose --env-file "$env_file" -f "$compose_file" config | grep -Eq 'published: (5432|6379)$'; then
+rendered_config="$(docker compose --env-file "$env_file" -f "$compose_file" config)"
+
+if ! docker compose --env-file "$env_file" -f "$compose_file" config --volumes | grep -Fxq 'product_images'; then
+  echo "Volume persistente product_images não declarado" >&2
+  exit 1
+fi
+
+if ! printf '%s\n' "$rendered_config" | grep -Fq 'target: /app/public/uploads/products'; then
+  echo "Serviço web deve montar product_images em /app/public/uploads/products" >&2
+  exit 1
+fi
+
+if ! printf '%s\n' "$rendered_config" | grep -Fq 'source: product_images'; then
+  echo "Mount de uploads deve usar o volume product_images" >&2
+  exit 1
+fi
+
+if printf '%s\n' "$rendered_config" | grep -Eq 'published: (5432|6379)$'; then
   echo "PostgreSQL/Redis não podem ter portas públicas" >&2
   exit 1
 fi

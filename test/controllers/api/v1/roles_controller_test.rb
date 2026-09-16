@@ -6,13 +6,14 @@ class Api::V1::RolesControllerTest < ActionDispatch::IntegrationTest
     @owner = User.create!(name: "Dono", email: "dono@example.com", password: "secret123", role: "superAdmin", restaurant: @restaurant)
     @admin = User.create!(name: "Admin", email: "admin@example.com", password: "secret123", role: "admin", restaurant: @restaurant)
     @employee = User.create!(name: "Equipe", email: "equipe@example.com", password: "secret123", role: "funcionario", restaurant: @restaurant)
+    @platform_owner = PlatformUser.create!(name: "Platform Owner", email: "platform.roles@example.com", password: "secret123", role: "owner")
   end
 
   test "cria restaurante com seu único superAdmin" do
-    post "/api/v1/restaurants", params: {
+    post "/api/internal/restaurants", params: {
       restaurant: { name: "PedeAI Norte" },
       super_admin: { name: "Dona Norte", email: "dona.norte@example.com", password: "secret123", password_confirmation: "secret123" }
-    }, as: :json
+    }, headers: platform_auth, as: :json
 
     assert_response :created
     restaurant = Restaurant.find(response.parsed_body.dig("restaurant", "id"))
@@ -23,10 +24,10 @@ class Api::V1::RolesControllerTest < ActionDispatch::IntegrationTest
 
   test "criação inválida não deixa restaurante sem superAdmin" do
     assert_no_difference "Restaurant.count" do
-      post "/api/v1/restaurants", params: {
+      post "/api/internal/restaurants", params: {
         restaurant: { name: "PedeAI Norte" },
         super_admin: { name: "Dona Norte", email: "invalido", password: "secret123" }
-      }, as: :json
+      }, headers: platform_auth, as: :json
     end
 
     assert_response :unprocessable_entity
@@ -138,6 +139,10 @@ class Api::V1::RolesControllerTest < ActionDispatch::IntegrationTest
 
   def auth(user)
     { "Authorization" => "Bearer #{user.api_token}" }
+  end
+
+  def platform_auth
+    { "Authorization" => "Bearer #{@platform_owner.api_token}" }
   end
 end
 

@@ -5,6 +5,7 @@ module Api
       before_action :resolve_restaurant!
       before_action :authenticate_user!
       before_action :authorize_restaurant!
+      before_action :require_active_restaurant!, only: %i[create update destroy]
 
       def index
         require_permission!("users:read") if current_user.funcionario?

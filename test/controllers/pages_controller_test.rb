@@ -83,6 +83,19 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "text/html; charset=utf-8", response.media_type + "; charset=#{response.charset}"
   end
 
+  test "PedeAi Control is independent, accessible, and does not expose tenant credentials" do
+    get "/control"
+
+    assert_response :success
+    assert_includes response.body, "PedeAi Control"
+    assert_includes response.body, "/api/internal"
+    assert_includes response.body, "aria-live"
+    assert_includes response.body, ":focus-visible"
+    assert_includes response.body, "@media(max-width:760px)"
+    assert_not_includes response.body, "admin123"
+    assert_not_includes response.body, "restaurant_slug"
+  end
+
   test "arquivos de documentação são servidos com UTF-8" do
     get "/docs"
     assert_response :success
@@ -142,6 +155,21 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes admin, "ui-panel"
   end
 
+  test "cardapios substituem imagem de produto indisponivel sem repetir o fallback" do
+    desktop = Rails.root.join("docs/menu.html").read
+    mobile = Rails.root.join("docs/menu-mobile.html").read
+
+    [desktop, mobile].each do |source|
+      compact = source.gsub(/\s+/, "")
+      assert_includes source, "productImageFallback"
+      assert_includes source, "handleProductImageError"
+      assert_includes source, 'new URL(productImageFallback(), document.baseURI).href'
+      assert_includes source, "if (image.src === fallback) return"
+      assert_includes source, 'document.addEventListener("error", handleProductImageError, true)'
+      assert_includes compact, "product.image_url||productImageFallback()"
+    end
+  end
+
   test "clientes empacotados usam Lineicons" do
     %w[docs/menu.html docs/menu-mobile.html docs/pagina-inicial.html docs/admin.html].each do |path|
       source = Rails.root.join(path).read
@@ -195,5 +223,49 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes admin, '`${key}[]`'
     assert_not_includes admin, '`${key}[${index}]`'
     assert_includes admin, "image/png,image/jpeg,image/webp"
+  end
+
+  test "cardapios bloqueiam checkout quando restaurante esta fechado" do
+    desktop = Rails.root.join("docs/menu.html").read
+    mobile = Rails.root.join("docs/menu-mobile.html").read
+
+    [desktop, mobile].each do |source|
+      assert_includes source, "isRestaurantOpen"
+      assert_includes source, "closedMessage"
+      assert_includes source, "restaurant_closed"
+      assert_includes source, "restaurant-closed-modal"
+      assert_includes source, "showRestaurantClosedModal"
+      assert_includes source, "closeRestaurantClosedModal"
+      assert_includes source, "Restaurante fechado"
+      assert_includes source, "next_opening"
+      assert_includes source, "refreshOperatingStatus"
+      assert_includes source, "setInterval(refreshOperatingStatus,"
+      assert_includes source, "60000"
+      assert_includes source, "state.cart.clear()"
+    end
+
+    assert_includes desktop, 'aria-disabled="${String(!isRestaurantOpen())}"'
+    assert_includes mobile, 'bar.setAttribute("aria-disabled", String(!isRestaurantOpen()))'
+    assert_includes mobile, 'submit.setAttribute("aria-disabled", String(!isRestaurantOpen()))'
+  end
+
+  test "clientes e painel explicitam composição de preço personalizado" do
+    desktop = Rails.root.join("docs/menu.html").read
+    mobile = Rails.root.join("docs/menu-mobile.html").read
+    admin = Rails.root.join("docs/admin.html").read
+
+    [desktop, mobile].each do |source|
+      assert_includes source, "composeCustomizedUnitPrice"
+      assert_includes source, "variant?.price"
+      assert_includes source, "addon.price"
+    end
+    assert_includes mobile, "order.order_items"
+    assert_includes mobile, "item.unit_price"
+    assert_includes admin, "Preço final da variação"
+    assert_includes admin, "Adicionais (acréscimos ao preço)"
+    assert_includes admin, "confirmSuspiciousVariantPrices"
+    assert_includes admin, "window.confirm"
+    assert_includes admin, "if (!confirmSuspiciousVariantPrices(newProductForm)) return"
+    assert_includes admin, "if (!confirmSuspiciousVariantPrices(form)) return"
   end
 end

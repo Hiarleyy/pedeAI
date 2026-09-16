@@ -29,10 +29,30 @@ paths:
         '200': { description: Sessão criada, content: { application/json: { schema: { $ref: '#/components/schemas/SessionResponse' } } } }
         '400': { $ref: '#/components/responses/InvalidRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
-  /api/v1/restaurants:
+  /api/internal/session:
+    post:
+      tags: [Authentication]
+      summary: Autentica um operador global da plataforma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Global session created }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { description: Limite de tentativas excedido }
+  /api/internal/restaurants:
+    get:
+      tags: [Restaurants]
+      summary: Lista global paginada de restaurantes
+      security: [{ platformBearerAuth: [] }]
+      responses:
+        '200': { description: Paginated restaurant portfolio }
     post:
       tags: [Restaurants]
-      summary: Cria restaurante e superadministrador atomicamente
+      summary: Cria restaurante e superadministrador atomicamente por operador autorizado
+      security: [{ platformBearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -41,7 +61,38 @@ paths:
       responses:
         '201': { description: Restaurante criado, content: { application/json: { schema: { type: object } } } }
         '400': { $ref: '#/components/responses/InvalidRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
+  /api/internal/restaurants/{id}:
+    get:
+      tags: [Restaurants]
+      security: [{ platformBearerAuth: [] }]
+      responses: { '200': { description: Restaurante global } }
+    patch:
+      tags: [Restaurants]
+      security: [{ platformBearerAuth: [] }]
+      responses: { '200': { description: Restaurante atualizado } }
+  /api/internal/restaurants/{id}/suspend:
+    post:
+      tags: [Restaurants]
+      security: [{ platformBearerAuth: [] }]
+      responses: { '200': { description: Restaurant suspended }, '409': { description: Invalid lifecycle transition } }
+  /api/internal/restaurants/{id}/reactivate:
+    post:
+      tags: [Restaurants]
+      security: [{ platformBearerAuth: [] }]
+      responses: { '200': { description: Restaurant reactivated }, '409': { description: Invalid lifecycle transition } }
+  /api/internal/audit_events:
+    get:
+      tags: [Authentication]
+      security: [{ platformBearerAuth: [] }]
+      responses: { '200': { description: Eventos de auditoria paginados } }
+  /api/internal/diagnostics:
+    get:
+      tags: [Authentication]
+      security: [{ platformBearerAuth: [] }]
+      responses: { '200': { description: Version, build, and service health } }
   /api/v1/restaurants/{restaurant_slug}:
     parameters:
       - { $ref: '#/components/parameters/RestaurantSlug' }
@@ -180,7 +231,7 @@ paths:
     post:
       tags: [Products]
       summary: Importa categorias e produtos de um arquivo JSON versão 1, sem imagens
-      description: Requer `categories:write` e `products:write`. Baixe o modelo em `/menu-import-template.json`; imagens devem ser adicionadas depois pela edição do produto.
+      description: Requer `categories:write` e `products:write`. Baixe o modelo em `/menu-import-template.json`; `variants[].price` é o preço final absoluto da opção e `addons[].price` é um acréscimo. Imagens devem ser adicionadas depois pela edição do produto.
       security: [{ bearerAuth: [] }]
       requestBody:
         required: true
@@ -235,6 +286,7 @@ paths:
       responses:
         '201': { description: Pedido criado, content: { application/json: { schema: { $ref: '#/components/schemas/Order' } } } }
         '400': { $ref: '#/components/responses/InvalidRequest' }
+        '409': { $ref: '#/components/responses/RestaurantClosed' }
         '404': { $ref: '#/components/responses/NotFound' }
         '422': { $ref: '#/components/responses/ValidationError' }
   /api/v1/restaurants/{restaurant_slug}/orders/{id}:
@@ -326,6 +378,7 @@ paths:
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer }
+    platformBearerAuth: { type: http, scheme: bearer }
   parameters:
     RestaurantSlug:
       name: restaurant_slug
@@ -343,6 +396,7 @@ components:
     NotFound: { description: Restaurante ou recurso não encontrado no tenant, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
     InvalidRequest: { description: Estrutura da requisição inválida, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
     ValidationError: { description: Validação de domínio falhou, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    RestaurantClosed: { description: Restaurante fora do horário de funcionamento, content: { application/json: { schema: { $ref: '#/components/schemas/RestaurantClosedError' } } } }
   requestBodies:
     RestaurantUpdate:
       required: true
@@ -361,9 +415,16 @@ components:
       type: object
       required: [error, messages]
       properties:
-        error: { type: string, enum: [unauthorized, forbidden, resource_not_found, invalid_request, validation_error, invalid_credentials] }
+        error: { type: string, enum: [unauthorized, forbidden, resource_not_found, invalid_request, validation_error, invalid_credentials, restaurant_closed] }
         messages: { type: array, items: { type: string } }
         permission: { type: string }
+    RestaurantClosedError:
+      type: object
+      required: [error, messages, next_opening]
+      properties:
+        error: { type: string, const: restaurant_closed }
+        messages: { type: array, items: { type: string } }
+        next_opening: { type: [string, 'null'], pattern: '^(?:[01]\d|2[0-3]):[0-5]\d$' }
     Restaurant:
       type: object
       required: [id, name, slug, primary_color, font_family]
@@ -415,21 +476,34 @@ components:
         category_id: { type: integer }
         name: { type: string, minLength: 2, maxLength: 120 }
         description: { type: [string, 'null'], maxLength: 500 }
-        price: { type: number, exclusiveMinimum: 0 }
+        price: { type: number, exclusiveMinimum: 0, description: Preço base usado quando o produto não possui variação ativa }
         available: { type: boolean, default: true }
         image_url: { type: [string, 'null'], format: uri }
         addons:
           type: array
-          description: Configuração administrativa dos adicionais do produto; a lista substitui a configuração existente quando enviada.
+          description: Configuração administrativa de acréscimos somados ao preço base ou à variação; a lista substitui a configuração existente quando enviada.
           items: { $ref: '#/components/schemas/ProductAddonInput' }
+        variants:
+          type: array
+          description: Variações com preço final absoluto do produto; a lista substitui a configuração existente quando enviada.
+          items: { $ref: '#/components/schemas/ProductVariantInput' }
     ProductAddonInput:
       type: object
       required: [name, price]
       properties:
         id: { type: integer, description: Identificador de adicional existente durante atualização }
         name: { type: string, minLength: 1, maxLength: 120 }
-        price: { type: number, exclusiveMinimum: 0 }
+        price: { type: number, exclusiveMinimum: 0, description: Acréscimo somado ao preço base ou à variação selecionada }
         available: { type: boolean, default: true }
+    ProductVariantInput:
+      type: object
+      required: [name, price]
+      properties:
+        id: { type: integer, description: Identificador de variação existente durante atualização }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        price: { type: number, exclusiveMinimum: 0, description: Preço final absoluto do produto nesta variação }
+        available: { type: boolean, default: true }
+        position: { type: integer, minimum: 0, default: 0 }
     MenuImportResult:
       type: object
       required: [categories_created, products_created]
@@ -468,6 +542,7 @@ components:
                 properties:
                   product_id: { type: integer }
                   quantity: { type: integer, minimum: 1, maximum: 50 }
+                  variant_id: { type: integer, description: Identificador da variação ativa cujo preço é o valor final absoluto do produto }
                   addon_ids: { type: array, items: { type: integer }, uniqueItems: true, description: Identificadores dos adicionais ativos do próprio produto }
     Order:
       type: object
@@ -491,7 +566,9 @@ components:
       properties:
         product_id: { type: integer }
         quantity: { type: integer }
-        unit_price: { type: number, readOnly: true }
+        unit_price: { type: number, readOnly: true, description: Preço base ou preço absoluto da variação mais os adicionais selecionados }
+        variant_name: { type: [string, 'null'], readOnly: true }
+        variant_price: { type: [number, 'null'], readOnly: true, description: Snapshot do preço final absoluto da variação }
         product: { $ref: '#/components/schemas/Product' }
         addons: { type: array, readOnly: true, items: { $ref: '#/components/schemas/OrderItemAddon' } }
     OrderItemAddon:

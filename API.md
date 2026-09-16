@@ -16,13 +16,26 @@ docker compose exec api bundle exec rails db:seed
 - Swagger UI: http://localhost:3000/docs
 - OpenAPI: http://localhost:3000/openapi.yaml
 - Health check: http://localhost:3000/up
+- PedeAi Control: http://localhost:3000/control
 
 ## Operações globais
 
 Somente operações que ainda não possuem contexto de restaurante ficam fora da rota com slug:
 
 - `POST /api/v1/session`: autenticação administrativa. A resposta inclui token, usuário e restaurante com seu slug.
-- `POST /api/v1/restaurants`: cria atomicamente um restaurante e seu primeiro `superAdmin`.
+- `POST /api/internal/session`: autentica um operador global separado dos usuÃ¡rios de tenant.
+- `/api/internal/restaurants`: lista e administra restaurantes com token global; a criaÃ§Ã£o inclui atomicamente o primeiro `superAdmin`.
+- `/api/internal/audit_events` e `/api/internal/diagnostics`: auditoria e diagnÃ³stico protegidos por permissÃ£o.
+
+O antigo `POST /api/v1/restaurants` foi removido e nÃ£o aceita onboarding anÃ´nimo.
+
+### Ambiente DEV do Control
+
+Inicie API, worker, PostgreSQL e Redis com `docker compose -f docker-compose.dev.yml up --build`. O operador inicial vem de `PLATFORM_OWNER_NAME`, `PLATFORM_OWNER_EMAIL` e `PLATFORM_OWNER_PASSWORD`; altere os valores locais antes de compartilhar o ambiente. A senha nunca Ã© impressa pelo seed.
+
+`docker compose -f docker-compose.dev.yml exec api bundle exec rails db:seed` atualiza somente o operador global. Use `bundle exec rails demo:seed` explicitamente para carregar Forno & Massa e Burger Lab, ou `bundle exec rails demo:reset` para recriar somente esses tenants conhecidos. Rotacione a credencial alterando as variÃ¡veis e executando `db:seed` novamente.
+
+Os diagnÃ³sticos usam `APP_VERSION`, `SOURCE_COMMIT` e `BUILD_TIMESTAMP`, definidos durante o build.
 
 ## Catálogo e pedidos públicos
 
@@ -53,6 +66,28 @@ Exemplo de pedido:
 ```
 
 Para `order_type: dine_in`, informe `table_number` no lugar de `delivery_address`. O cliente nunca envia `unit_price` ou `total`: a API usa o preço persistido, calcula o total e rejeita produtos indisponíveis ou pertencentes a outro restaurante. Pedido e itens são gravados de forma atômica.
+
+### Horário de funcionamento
+
+Novos pedidos são aceitos somente durante um intervalo habilitado em `menu_information.hours`, avaliado no fuso IANA configurado pelo restaurante. A abertura pertence ao intervalo e o instante exato do fechamento já é considerado fechado. Intervalos que atravessam a meia-noite são suportados; quando nenhum horário está configurado ou habilitado, o restaurante permanece fechado para novos pedidos.
+
+O cardápio continua disponível para consulta e pedidos existentes continuam acessíveis pelo acompanhamento. Uma tentativa de criar pedido fora do horário responde `409` sem persistir pedido ou itens:
+
+```json
+{
+  "error": "restaurant_closed",
+  "messages": ["Restaurante fechado. Abre às 18:00."],
+  "next_opening": "18:00"
+}
+```
+
+`next_opening` será `null` quando não houver próxima abertura habilitada na agenda semanal.
+
+### Preços de produtos personalizados
+
+O servidor sempre calcula os preços usando os registros persistidos e ignora valores enviados pelo navegador. Para produtos sem variação, o preço unitário é `produto.price + soma dos adicionais`. Para produtos com variação, `variant.price` representa o preço final absoluto daquela opção e o cálculo é `variant.price + soma dos adicionais`; o preço base não é somado novamente.
+
+No JSON de importação, `addons[].price` é um acréscimo e `variants[].price` é o valor final do produto naquela variação. Exemplo: produto base de R$ 24,90, variação Duplo de R$ 30,90 e Bacon de R$ 4,50 resultam em R$ 35,40 por unidade; duas unidades totalizam R$ 70,80.
 
 ### Acompanhamento público de pedido
 
@@ -93,5 +128,5 @@ Rotas como `/api/v1/products`, `/api/v1/categories`, `/api/v1/orders` e `/api/v1
 ## Testes
 
 ```bash
-docker compose run --rm -e RAILS_ENV=test -e TEST_DATABASE_URL=postgres://postgres:postgres@db:5432/pedeai_test api bash -lc "bundle exec rails db:prepare && bundle exec rails test"
+docker compose -f docker-compose.dev.yml run --rm -e RAILS_ENV=test -e TEST_DATABASE_URL=postgres://postgres:postgres@db:5432/pedeai_test --entrypoint bundle api exec rails test
 ```

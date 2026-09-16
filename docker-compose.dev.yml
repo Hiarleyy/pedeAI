@@ -1,3 +1,14 @@
+x-app-environment: &app-environment
+  DATABASE_URL: postgres://postgres:postgres@db:5432/pedeai_development
+  REDIS_URL: redis://redis:6379/0
+  RAILS_ENV: development
+  PLATFORM_OWNER_NAME: ${PLATFORM_OWNER_NAME:-PedeAi Owner}
+  PLATFORM_OWNER_EMAIL: ${PLATFORM_OWNER_EMAIL:-AdminControl@pedeai.dev}
+  PLATFORM_OWNER_PASSWORD: ${PLATFORM_OWNER_PASSWORD:-pedeaiDev}
+  APP_VERSION: ${APP_VERSION:-development}
+  SOURCE_COMMIT: ${SOURCE_COMMIT:-local}
+  BUILD_TIMESTAMP: ${BUILD_TIMESTAMP:-local}
+
 services:
   db:
     image: postgres:16-alpine
@@ -6,22 +17,59 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports: ["5432:5432"]
-    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    volumes: [postgres_data:/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pedeai_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis_data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 10
     restart: unless-stopped
   api:
-    build: .
-    command: bash -lc "rm -f tmp/pids/server.pid && bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0"
-    volumes: [".:/app"]
+    build:
+      context: .
+      args: &build-args
+        APP_VERSION: ${APP_VERSION:-development}
+        SOURCE_COMMIT: ${SOURCE_COMMIT:-local}
+        BUILD_TIMESTAMP: ${BUILD_TIMESTAMP:-local}
+    entrypoint: []
+    command: ["/bin/bash", "-lc", "rm -f tmp/pids/server.pid && bundle exec rails db:prepare db:seed && bundle exec rails server -b 0.0.0.0"]
+    volumes: [".:/app", "product_images:/app/public/uploads/products"]
     ports: ["3000:3000"]
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/pedeai_development
-      RAILS_ENV: development
+    environment: *app-environment
     restart: unless-stopped
-    depends_on: [db]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/up || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  worker:
+    build:
+      context: .
+      args: *build-args
+    entrypoint: []
+    command: ["/bin/bash", "-lc", "bundle exec sidekiq -C config/sidekiq.yml"]
+    volumes: [".:/app", "product_images:/app/public/uploads/products"]
+    environment: *app-environment
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
 volumes:
-  postgres_data:
+  postgres_data: { name: pedeai_dev_postgres_data }
+  redis_data: { name: pedeai_dev_redis_data }
+  product_images: { name: pedeai_dev_product_images }

@@ -13,8 +13,13 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
       DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:?POSTGRES_DB is required}
       REDIS_URL: redis://redis:6379/0
+      PLATFORM_OWNER_NAME: ${PLATFORM_OWNER_NAME:-PedeAi Owner}
+      PLATFORM_OWNER_EMAIL: ${PLATFORM_OWNER_EMAIL:-AdminControl@pedeai.dev}
+      PLATFORM_OWNER_PASSWORD: ${PLATFORM_OWNER_PASSWORD:-pedeaiDev}
     expose:
       - "3000"
+    volumes:
+      - product_images:/app/public/uploads/products
     networks:
       - private
       - traefik_public
@@ -85,6 +90,9 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:?POSTGRES_DB is required}
       REDIS_URL: redis://redis:6379/0
       SIDEKIQ_CONCURRENCY: ${SIDEKIQ_CONCURRENCY:-5}
+      PLATFORM_OWNER_NAME: ${PLATFORM_OWNER_NAME:-PedeAi Owner}
+      PLATFORM_OWNER_EMAIL: ${PLATFORM_OWNER_EMAIL:-AdminControl@pedeai.dev}
+      PLATFORM_OWNER_PASSWORD: ${PLATFORM_OWNER_PASSWORD:-pedeaiDev}
     networks: [private]
     restart: unless-stopped
     depends_on:
@@ -104,6 +112,9 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:?SECRET_KEY_BASE is required}
       DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:?POSTGRES_DB is required}
       REDIS_URL: redis://redis:6379/0
+      PLATFORM_OWNER_NAME: ${PLATFORM_OWNER_NAME:-PedeAi Owner}
+      PLATFORM_OWNER_EMAIL: ${PLATFORM_OWNER_EMAIL:-AdminControl@pedeai.dev}
+      PLATFORM_OWNER_PASSWORD: ${PLATFORM_OWNER_PASSWORD:-pedeaiDev}
     networks: [private]
     restart: "no"
     deploy:
@@ -166,3 +177,5 @@ volumes:
     name: pedeai_postgres_data
   redis_data:
     name: pedeai_redis_data
+  product_images:
+    name: pedeai_product_images

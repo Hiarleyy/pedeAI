@@ -15,6 +15,7 @@ class Restaurant < ApplicationRecord
     "visibility" => { "operating" => false, "delivery" => false, "location" => false, "contact" => false, "social" => false }
   }.freeze
   MENU_INFORMATION_GROUPS = %w[operating delivery location contact social].freeze
+  STATUSES = %w[active suspended].freeze
 
   before_validation :build_slug, on: :create
   validates :name, presence: true, length: { in: 2..120 }
@@ -22,6 +23,7 @@ class Restaurant < ApplicationRecord
   validates :menu_description, length: { maximum: 500 }, allow_blank: true
   validates :primary_color, format: { with: /\A#[0-9a-fA-F]{6}\z/ }
   validates :font_family, inclusion: { in: SUPPORTED_FONTS }
+  validates :status, inclusion: { in: STATUSES }
   validates_text_encoding :name, :menu_description, :banner_url, :logo_url, :product_placeholder_url, :menu_information
   validate :menu_information_is_valid
 
@@ -50,6 +52,30 @@ class Restaurant < ApplicationRecord
     else
       { "open" => false, "closes_at" => nil, "opens_at" => next_opening_after(local_time, timezone) }
     end
+  end
+
+  def open_for_orders?(now: Time.current)
+    menu_information_status(now: now)["open"]
+  end
+
+  def suspended? = status == "suspended"
+
+  def suspend!(reason:)
+    raise ActiveRecord::RecordInvalid, self if suspended?
+    self.status = "suspended"
+    self.suspension_reason = reason
+    self.suspended_at = Time.current
+    errors.add(:suspension_reason, "is required") if reason.blank?
+    save!
+  end
+
+  def reactivate!
+    raise ActiveRecord::RecordInvalid, self unless suspended?
+    update!(status: "active", suspension_reason: nil, suspended_at: nil)
+  end
+
+  def touch_last_access!
+    update_column(:last_access_at, Time.current) if last_access_at.nil? || last_access_at < 15.minutes.ago
   end
 
   def as_json(options = nil)
@@ -96,14 +122,14 @@ class Restaurant < ApplicationRecord
   end
 
   def next_opening_after(local_time, timezone)
-    7.times do |offset|
+    openings = 8.times.flat_map do |offset|
       date = local_time.to_date + offset.days
-      Array(menu_information.dig("hours", date.wday.to_s)).each do |interval|
+      Array(menu_information.dig("hours", date.wday.to_s)).filter_map do |interval|
         next unless interval.is_a?(Hash) && interval["enabled"] != false
         opening = parse_local_time(date, interval["open"], timezone)
-        return opening.strftime("%H:%M") if opening && opening > local_time
+        opening if opening && opening > local_time
       end
     end
-    nil
+    openings.min&.strftime("%H:%M")
   end
 end

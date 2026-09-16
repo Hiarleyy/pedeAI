@@ -3,7 +3,7 @@ require "tempfile"
 
 class Api::V1::MenuImportsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @restaurant = Restaurant.create!(name: "Restaurante Importador")
+    @restaurant = Restaurant.create!(name: "Restaurante Importador", menu_information: always_open_information)
     @owner = User.create!(restaurant: @restaurant, name: "Dono", email: "dono-importador@example.com", password: "secret123", role: "superAdmin")
     @category = @restaurant.categories.create!(name: "Bebidas")
   end
@@ -67,6 +67,34 @@ class Api::V1::MenuImportsControllerTest < ActionDispatch::IntegrationTest
     assert Rails.root.join("public", stored_url.delete_prefix("/")).exist?
   ensure
     ProductImageStorage.new.delete_url!(stored_url) if defined?(stored_url) && stored_url
+  end
+
+  test "produto importado mantém composição absoluta ao finalizar pedido personalizado" do
+    payload = menu_payload(categories: [{
+      name: "Lanches",
+      products: [{
+        name: "X-Importado Completo",
+        price: 25,
+        addons: [{ name: "Bacon", price: 4 }, { name: "Ovo", price: 2.5 }],
+        variants: [{ name: "Duplo", price: 32.5, position: 0 }]
+      }]
+    }])
+    import(payload, headers: auth)
+    assert_response :created
+
+    product = @restaurant.products.includes(:addons, :variants).find_by!(name: "X-Importado Completo")
+    post "/api/v1/restaurants/#{@restaurant.slug}/orders", params: { order: {
+      customer_name: "Cliente", customer_phone: "11999999999", order_type: "delivery",
+      delivery_address: "Rua A, 1", payment_method: "pix",
+      items: [{ product_id: product.id, variant_id: product.variants.first.id, addon_ids: product.addons.pluck(:id), quantity: 2 }]
+    } }, as: :json
+
+    assert_response :created
+    assert_equal "78.0", response.parsed_body.fetch("total").to_s
+    item = OrderItem.last
+    assert_equal 39.to_d, item.unit_price
+    assert_equal 78.to_d, item.order.total
+    assert_equal ["Bacon", "Ovo"], item.addons.order(:name).pluck(:name)
   end
 
   test "rejeita campos de imagem e preserva todos os dados" do
@@ -181,4 +209,8 @@ class Api::V1::MenuImportsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def auth(user = @owner) = { "Authorization" => "Bearer #{user.api_token}" }
+
+  def always_open_information
+    { "timezone" => "America/Sao_Paulo", "hours" => (0..6).to_h { |day| [day.to_s, [{ "open" => "00:00", "close" => "00:00", "enabled" => true }]] } }
+  end
 end

@@ -36,4 +36,10 @@ module Authenticatable
 
     raise ActiveRecord::RecordNotFound
   end
+
+  def require_active_restaurant!
+    return unless current_restaurant&.suspended?
+
+    render json: { error: "restaurant_suspended", messages: ["Restaurant is suspended"] }, status: :conflict
+  end
 end

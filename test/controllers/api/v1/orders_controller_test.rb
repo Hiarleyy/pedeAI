@@ -2,13 +2,14 @@
 
 class Api::V1::OrdersControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @restaurant = Restaurant.create!(name: "Restaurante Pedidos")
+    @restaurant = Restaurant.create!(name: "Restaurante Pedidos", menu_information: always_open_information)
     category = Category.create!(restaurant: @restaurant, name: "Lanches")
     @product = Product.create!(restaurant: @restaurant, category: category, name: "Burger", price: 25.0)
     @cheese = @product.addons.create!(name: "Queijo extra", price: 4.5)
+    @egg = @product.addons.create!(name: "Ovo", price: 3)
     @inactive_addon = @product.addons.create!(name: "Bacon indisponível", price: 6, available: false)
     @unavailable = Product.create!(restaurant: @restaurant, category: category, name: "Burger esgotado", price: 30.0, available: false)
-    @other_restaurant = Restaurant.create!(name: "Outro Restaurante de Pedidos")
+    @other_restaurant = Restaurant.create!(name: "Outro Restaurante de Pedidos", menu_information: always_open_information)
     other_category = Category.create!(restaurant: @other_restaurant, name: "Outros Lanches")
     @other_product = Product.create!(restaurant: @other_restaurant, category: other_category, name: "Burger alheio", price: 100.0)
     @foreign_addon = @other_product.addons.create!(name: "Molho alheio", price: 3)
@@ -31,6 +32,42 @@ class Api::V1::OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
     assert_equal "12", response.parsed_body["table_number"]
     assert_equal "Mesa 12", response.parsed_body["table_label"]
+  end
+
+  test "rejeita pedido quando restaurante esta fechado sem persistir o agregado" do
+    @restaurant.update!(menu_information: schedule_information("1" => [{ "open" => "10:00", "close" => "12:00", "enabled" => true }]))
+
+    travel_to ActiveSupport::TimeZone["America/Sao_Paulo"].parse("2026-09-07 09:00:00") do
+      assert_no_difference ["Order.count", "OrderItem.count"] do
+        post orders_path, params: order_payload(@product), as: :json
+      end
+    end
+
+    assert_response :conflict
+    assert_equal "restaurant_closed", response.parsed_body["error"]
+    assert_equal "10:00", response.parsed_body["next_opening"]
+    assert_includes response.parsed_body.fetch("messages").first, "Restaurante fechado"
+  end
+
+  test "rejeita pedido quando restaurante nao possui horarios configurados" do
+    @restaurant.update!(menu_information: schedule_information({}))
+
+    assert_no_difference ["Order.count", "OrderItem.count"] do
+      post orders_path, params: order_payload(@product), as: :json
+    end
+
+    assert_response :conflict
+    assert_equal({ "error" => "restaurant_closed", "messages" => ["Restaurante fechado no momento."], "next_opening" => nil }, response.parsed_body)
+  end
+
+  test "mantem rastreamento disponivel quando restaurante esta fechado" do
+    order = create_tracked_order
+    @restaurant.update!(menu_information: schedule_information({}))
+
+    get track_orders_path, params: { query: "##{order.id}" }
+
+    assert_response :success
+    assert_equal order.id, response.parsed_body["id"]
   end
 
   test "mantem a listagem de pedidos restrita a administradores" do
@@ -80,6 +117,22 @@ class Api::V1::OrdersControllerTest < ActionDispatch::IntegrationTest
     item = response.parsed_body.fetch("order_items").first
     assert_equal "29.5", item["unit_price"].to_s
     assert_equal [{ "name" => "Queijo extra", "price" => "4.5" }], item.fetch("addons").map { |addon| addon.slice("name", "price") }
+  end
+
+  test "calcula variação absoluta, múltiplos adicionais e quantidade no servidor" do
+    variant = @product.variants.create!(name: "Duplo", price: 32.9)
+    payload = order_payload(@product)
+    item = payload[:order][:items].first
+    item.merge!(variant_id: variant.id, addon_ids: [@cheese.id, @egg.id], quantity: 2, unit_price: 0.01, addon_price: 0.01)
+
+    post orders_path, params: payload, as: :json
+
+    assert_response :created
+    assert_equal "80.8", response.parsed_body["total"].to_s
+    persisted = OrderItem.last
+    assert_equal 40.4.to_d, persisted.unit_price
+    assert_equal 32.9.to_d, persisted.variant_price
+    assert_equal [3.to_d, 4.5.to_d], persisted.addons.map(&:price).sort
   end
 
   test "rejeita adicional inativo, duplicado ou de outro produto sem persistir" do
@@ -167,6 +220,18 @@ class Api::V1::OrdersControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def always_open_information
+    schedule_information((0..6).index_with { [{ "open" => "00:00", "close" => "00:00", "enabled" => true }] })
+  end
+
+  def schedule_information(hours)
+    {
+      "timezone" => "America/Sao_Paulo",
+      "hours" => hours.transform_keys(&:to_s),
+      "visibility" => { "operating" => true, "delivery" => false, "location" => false, "contact" => false, "social" => false }
+    }
+  end
 
   def orders_path = "/api/v1/restaurants/#{@restaurant.slug}/orders"
   def track_orders_path = "/api/v1/restaurants/#{@restaurant.slug}/orders/track"

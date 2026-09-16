@@ -9,15 +9,36 @@ docker build -t ghcr.io/sua-organizacao/pedeai:2026.09.10 .
 docker push ghcr.io/sua-organizacao/pedeai:2026.09.10
 ```
 
+Para publicar diretamente no repositorio Docker usado pela Stack:
+
+```bash
+docker build -t hiarley/pedeai:latest .
+docker push hiarley/pedeai:latest
+```
+
 Use a tag publicada em `PEDEAI_IMAGE`; não monte o código-fonte como volume em produção.
 
 ## 2. Criar a Stack
 
 No Portainer, escolha **Stacks > Add stack**, cole o conteúdo de `deploy/portainer-stack.yml` e cadastre as variáveis de `deploy/.env.example` em **Environment variables**. Substitua todos os valores `replace-*`, use uma `SECRET_KEY_BASE` aleatória e mantenha PostgreSQL/Redis apenas na rede privada da Stack.
 
-A Stack expõe a porta `3000` somente dentro das redes Docker; o acesso público acontece pelo Traefik. O serviço `migrate` executa `rails db:prepare` uma vez; confirme que terminou com código 0 antes de colocar `web` e `worker` em serviço.
+A Stack expõe a porta `3000` somente dentro das redes Docker; o acesso público acontece pelo Traefik. O serviço `migrate` executa `rails db:prepare db:seed` uma vez; confirme que terminou com código 0 antes de colocar `web` e `worker` em serviço.
 
-### 2.1 Dominio e HTTPS
+As imagens enviadas para produtos ficam no volume nomeado `pedeai_product_images`, montado em `/app/public/uploads/products` somente no serviço `web`. Esse volume é dado de negócio: preserve-o junto com o PostgreSQL e não o remova ao substituir a imagem da aplicação.
+
+### 2.1 Operador da plataforma e painel de controle
+
+Cadastre estas variaveis no ambiente da Stack. Os valores abaixo sao o fallback solicitado; troque a senha antes de expor a aplicacao publicamente:
+
+```dotenv
+PLATFORM_OWNER_NAME=PedeAi Owner
+PLATFORM_OWNER_EMAIL=AdminControl@pedeai.dev
+PLATFORM_OWNER_PASSWORD=pedeaiDev
+```
+
+O servico `migrate` executa `rails db:prepare db:seed`. O seed e idempotente: cria o operador na primeira execucao e atualiza nome, senha, papel e estado ativo nas seguintes. Depois que `migrate` terminar com codigo 0, acesse `https://pedeai.insilico.cloud/control` e autentique-se com `PLATFORM_OWNER_EMAIL` e `PLATFORM_OWNER_PASSWORD`.
+
+### 2.2 Dominio e HTTPS
 
 O ambiente de producao usa `pedeai.insilico.cloud` por padrao. Mantenha estas variaveis na Stack:
 
@@ -49,7 +70,7 @@ server {
 
 O certificado deve ser gerenciado pelo proxy (por exemplo, Nginx Proxy Manager, Traefik ou Certbot), nao pela aplicacao Rails.
 
-### 2.2 Traefik existente
+### 2.3 Traefik existente
 
 A Stack conecta somente o serviço `web` à rede externa do Traefik. Para o ambiente atual, configure:
 
@@ -78,32 +99,45 @@ docker service ls | grep pedeai
 docker service inspect pedeai_web --format '{{json .Spec.Labels}}'
 docker service inspect pedeai_web --format '{{range .Spec.TaskTemplate.Networks}}{{.Target}}{{println}}{{end}}'
 docker service inspect pedeai_web --format '{{json .Endpoint.Spec.Ports}}'
+docker service inspect pedeai_web --format '{{json .Spec.TaskTemplate.ContainerSpec.Mounts}}'
 ```
 
-O último comando deve retornar `null`. Se exibir uma publicação `3000:3000`, a Stack antiga ainda está ativa. As labels do segundo comando devem conter `Host(`pedeai.insilico.cloud`)`, `websecure`, `letsencryptresolver` e `plataforma-redacao-web`.
+O comando de portas deve retornar `null`. Se exibir uma publicação `3000:3000`, a Stack antiga ainda está ativa. O comando de mounts deve mostrar `pedeai_product_images` em `/app/public/uploads/products`. As labels devem conter `Host(`pedeai.insilico.cloud`)`, `websecure`, `letsencryptresolver` e `plataforma-redacao-web`.
 
 ## 3. Atualizar ou fazer rollback
 
 1. Publique uma nova tag e altere somente `PEDEAI_IMAGE` no Stack.
 2. Execute/recrie `migrate` e confirme os logs.
 3. Verifique `GET /up`, os logs de `web` e o consumo de filas em `worker`.
-4. Se a nova versão não ficar saudável, retorne `PEDEAI_IMAGE` à tag anterior e reimplante.
+4. Antes e depois do redeploy, escolha uma URL real retornada em `image_url` e confirme que permanece acessível: `curl -fI "https://pedeai.insilico.cloud/uploads/products/<arquivo>"`.
+5. Se a nova versão não ficar saudável, retorne `PEDEAI_IMAGE` à tag anterior e reimplante.
 
-Não remova os volumes `pedeai_postgres_data` ou `pedeai_redis_data` durante uma atualização.
+Não remova os volumes `pedeai_postgres_data`, `pedeai_redis_data` ou `pedeai_product_images` durante atualização ou rollback. A verificação usa somente o domínio HTTPS publicado pelo Traefik; não publique a porta interna `3000` no host.
 
 ## 4. Backup e restore
 
-Faça backup periódico do PostgreSQL antes de migrações:
+Faça backup periódico do PostgreSQL e do volume de imagens no mesmo período de manutenção, antes de migrações ou mudanças de Stack:
 
 ```bash
 docker exec <container-db> pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > backup.sql
+docker run --rm -v pedeai_product_images:/data:ro -v "$PWD":/backup alpine \
+  tar -czf /backup/pedeai-product-images.tar.gz -C /data .
 ```
 
-Restaure em uma instância de manutenção com `psql` e valide `/up` antes de direcionar tráfego. O Redis armazena filas transitórias; preserve o volume para reinícios, mas trate o PostgreSQL como fonte dos dados de negócio.
+Restaure o banco e o volume em uma instância de manutenção antes de direcionar tráfego. Com o serviço `web` parado, restaure as imagens:
+
+```bash
+docker run --rm -v pedeai_product_images:/data -v "$PWD":/backup alpine \
+  tar -xzf /backup/pedeai-product-images.tar.gz -C /data
+```
+
+Depois, valide `/up` e uma amostra das URLs `/uploads/products/...` referenciadas pelo banco. O Redis armazena filas transitórias; preserve o volume para reinícios, mas trate PostgreSQL e `pedeai_product_images` como o conjunto recuperável dos dados de negócio.
+
+O primeiro deploy desta versão cria um volume vazio e não recupera arquivos que já desapareceram de containers anteriores. Para referências históricas quebradas, execute primeiro `bin/rails product_images:reconcile` em modo de relatório e confirme cada URL com `curl -fI`. Reenvie a imagem pelo painel quando o arquivo original estiver disponível. Qualquer limpeza com `DELETE=true` é uma ação destrutiva separada, somente depois de revisar o relatório; ela não recupera imagens ausentes.
 
 ## 5. Segurança e troubleshooting
 
 - Nunca publique as portas 5432 ou 6379.
 - Nunca registre tokens, senhas ou payloads de cardápio nos logs.
-- Use a rotação de logs configurada na Stack e o backup externo do volume PostgreSQL.
+- Use a rotação de logs configurada na Stack e mantenha backups externos coordenados do PostgreSQL e do volume `pedeai_product_images`.
 - Se `web` estiver unhealthy, consulte primeiro `db`, `redis` e as variáveis obrigatórias; o health check da aplicação usa `/up`.
